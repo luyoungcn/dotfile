@@ -1,1 +1,1 @@
-# dotfile
+Arch i3wm
