@@ -49,6 +49,9 @@ exec --no-startup-id compton --config ~/.config/i3/compton.conf -b
 exec --no-startup-id fcitx5
 exec --no-startup-id nutstore
 
+# for virtualbox guest os Arch + i3
+exec --no-startup-id VBoxClient-all
+
 # i3-gaps
 # smart_borders on      # borders only if more than one container in the workspace
 # smart_gaps on         # gaps only if more than one container in the workspace
