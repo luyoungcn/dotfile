@@ -176,8 +176,8 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3 and end X session?' 
 # name the workspaces (icons require fontawesome)
 set $tag1  "1:  term"
 set $tag2  "2:  ie"
-set $tag3  "3:  fm"
-set $tag4  "4:  code"
+set $tag3  "3:  code"
+set $tag4  "4:  fm"
 set $tag5  "5: five"
 set $tag6  "6: six"
 set $tag7  "7: seven"
@@ -216,9 +216,9 @@ bindsym $mod+Shift+0 move container to workspace $tag10
 
 # automatically start programs in specific workspaces on login
 exec --no-startup-id i3-msg "workspace $tag1; exec xfce4-terminal"
-exec --no-startup-id i3-msg "workspace $tag2; exec /usr/bin/firefox"
-exec --no-startup-id i3-msg "workspace $tag3; exec thunar"
-exec --no-startup-id i3-msg "workspace $tag4; exec code"
+exec --no-startup-id i3-msg "workspace $tag2; exec /usr/bin/google-chrome-stable"
+exec --no-startup-id i3-msg "workspace $tag3; exec code"
+exec --no-startup-id i3-msg "workspace $tag4; exec thunar"
 
 # assign some applications to certain workspaces
 # assign [class="Firefox"] $tag1
@@ -294,5 +294,4 @@ bar {
 
 # LOCK, SUSPEND KEYBINDS
 
-bindsym Control+$mod+l exec --no-startup-id i3lock -i ~/wallpaper.jpg && xrandr --output Virtual1 --brightness 0.3
-bindsym Control+$mod+s exec --no-startup-id i3lock -i ~/wallpaper.jpg && xrandr --output Virtual1 --brightness 0.3 && systemctl suspend
+bindsym Control+$mod+l exec --no-startup-id i3lock -i "$HOME/.config/i3/lock.png"
