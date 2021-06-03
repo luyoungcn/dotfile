@@ -248,7 +248,7 @@ bar {
         # start using custom config file (full path)
         status_command       i3status -c ~/.config/i3/i3status.conf
         tray_padding         3
-        font pango:Roboto    12
+        font pango:Roboto Bold    11
 
         colors {
                 background #282A36
@@ -266,7 +266,7 @@ bar {
         position top
 
         # height of the bar in pixels
-        height 26
+        height 27
 }
 
 
