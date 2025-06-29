@@ -37,7 +37,7 @@ ReflowComments: true
 IndentCaseLabels: true
 BreakConstructorInitializers: AfterColon
 
-NamespaceIndentation: All
+NamespaceIndentation: None
 
 # Optional: Improve template formatting
 AlwaysBreakTemplateDeclarations: Yes
