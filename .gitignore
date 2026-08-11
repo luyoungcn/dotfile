@@ -1,0 +1,8 @@
+# zsh is intentionally outside the scope of this repository for now.
+/.zshrc
+
+# Local secrets and editor/OS artifacts.
+secrets.*
+*.secret
+.DS_Store
+*~
