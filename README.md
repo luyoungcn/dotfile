@@ -1,14 +1,17 @@
 # dotfiles
 
-Personal Neovim and tmux configuration.
+Personal Neovim, tmux, and zsh configuration.
 
 ## Layout
 
 - `nvim/`: LazyVim configuration, imported with its original Git history.
 - `tmux/tmux.conf.local`: personal overrides for oh-my-tmux.
-- `install.sh`: idempotent installer for configuration symlinks and oh-my-tmux.
+- `zsh/zshrc`: zsh configuration (Oh My Zsh + plugins + aliases + proxy).
+- `zsh/p10k.zsh`: Powerlevel10k theme configuration.
+- `install.sh`: idempotent installer for configuration symlinks, oh-my-tmux, and zsh.
 
-The repository deliberately does not manage zsh yet.
+See [`zsh/README.md`](zsh/README.md) for zsh dependency installation.
+See [`nvim/README.md`](nvim/README.md) for Neovim setup details.
 
 ## Install
 
@@ -28,7 +31,7 @@ Edit files through either their repository paths or the links under
 `~/.config`, then commit normally:
 
 ```sh
-git add nvim tmux
+git add nvim tmux zsh
 git commit
 ```
 

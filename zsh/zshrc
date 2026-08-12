@@ -1,0 +1,234 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+
+# Path to your Oh My Zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time Oh My Zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+# ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+# zstyle ':omz:update' frequency 13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+# plugins=(git zsh-autosuggestions zsh-syntax-highlighting docker npm)
+plugins=(git colored-man-pages colorize cp man command-not-found sudo suse ubuntu archlinux zsh-navigation-tools z extract history-substring-search python zsh-autosuggestions zsh-syntax-highlighting)
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='nvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch $(uname -m)"
+
+# Set personal aliases, overriding those provided by Oh My Zsh libs,
+# plugins, and themes. Aliases can be placed here, though Oh My Zsh
+# users are encouraged to define aliases within a top-level file in
+# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
+# - $ZSH_CUSTOM/aliases.zsh
+# - $ZSH_CUSTOM/macos.zsh
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+export PATH="$PATH:/snap/bin"
+
+
+
+
+
+
+# DeepSeek / Claude Code 通用非敏感配置
+export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
+export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash"
+export CLAUDE_CODE_SUBAGENT_MODEL="deepseek-v4-flash"
+export CLAUDE_CODE_EFFORT_LEVEL="max"
+export CLAUDE_CODE_AUTO_COMPACT_WINDOW="786432"
+
+# 动态加载私密密钥文件（如果存在）
+if [ -f "$HOME/.zshenv.local" ]; then
+    source "$HOME/.zshenv.local"
+fi
+
+# 定义 WSL 代理开关函数
+proxy () {
+    # 动态获取最新的 Windows 宿主机 IP
+    local host_ip=$(ip route | grep default | awk '{print $3}')
+
+    if [ -z "$host_ip" ]; then
+        # 兼容备用方案：从 /etc/resolv.conf 获取
+        host_ip=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}')
+    fi
+
+    if [ -z "$host_ip" ]; then
+        echo "Error: Unable to detect Windows Host IP."
+        return 1
+    fi
+
+    # 代理服务端口（请确认与 Windows 代理软件设置一致）
+    local proxy_port="10811"
+    local proxy_url="http://${host_ip}:${proxy_port}"
+
+    # 同时导出大小写环境变量，确保覆盖所有命令行工具
+    export http_proxy="$proxy_url"
+    export https_proxy="$proxy_url"
+    export all_proxy="$proxy_url"
+    export HTTP_PROXY="$proxy_url"
+    export HTTPS_PROXY="$proxy_url"
+    export ALL_PROXY="$proxy_url"
+
+    echo "Proxy enabled -> Windows Host: ${host_ip}:${proxy_port}"
+
+    # 快速测试连通性（可选项）
+    curl -I -s --connect-timeout 2 https://www.google.com | head -n 1
+}
+
+unproxy () {
+    # 批量取消代理环境变量
+    unset http_proxy https_proxy all_proxy
+    unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
+    echo "Proxy disabled."
+}
+
+# Docker SDK 快速启动与进入工具函数
+denter() {
+    local container_name="$1"
+    local work_dir="${2:-/workspace}"
+    local user="${3:-root}"
+    local shell_bin="${4:-/bin/bash}"
+
+    if [ -z "$container_name" ]; then
+        echo "Error: Container name is required."
+        return 1
+    fi
+
+    # 1. 检查容器是否存在
+    if ! docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+        echo "Error: Container '${container_name}' does not exist."
+        return 1
+    fi
+
+    # 2. 如果容器未运行，则启动容器
+    if [ "$(docker inspect -f '{{.State.Running}}' "$container_name" 2>/dev/null)" != "true" ]; then
+        echo "Starting container '${container_name}'..."
+        docker start "$container_name" >/dev/null || return 1
+    fi
+
+    # 3. 进入容器
+    echo "Entering '${container_name}' as '${user}' at '${work_dir}'..."
+    docker exec -it -u "$user" -w "$work_dir" "$container_name" "$shell_bin"
+}
+# 为 denter 函数添加 Docker 容器名 Tab 自动补全
+_denter_complete() {
+    local -a containers
+    containers=($(docker ps -a --format '{{.Names}}'))
+    _describe 'containers' containers
+}
+compdef _denter_complete denter
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH="$HOME/.local/bin:$PATH"
+
+# >>> Codex installer >>>
+export PATH="/home/luyang/.local/bin:$PATH"
+# <<< Codex installer <<<
+
+# 修改自动补全建议的颜色（例如设置为浅灰色或天蓝色）
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=244" # 244 是一种很舒服的灰色，也可换成 "fg=cyan"
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+# -----------------------------------------------------------------------------
+# SDK 便捷别名/快捷函数定义
+# -----------------------------------------------------------------------------
+alias bst_sdk_25.2.0='denter c1200_evkit_docker_sdk-v25.2.0 /workspace/host_folder'
+alias bst_sdk_2.3.0.4='denter a1000b-sdk-fad-2.3.0.4 /home'
+alias hanhai-sdk-2000='denter hanhai-sdk-manager-a2000-25 /home/share_mount'
