@@ -37,6 +37,7 @@
 - 关闭按钮：隐藏，减少视觉噪声
 - 消息弹窗：最大宽度和高度均为编辑区的 `90%`，长路径与文本自动换行完整显示
 - 右键与补全菜单：`pumblend = 0`，使用完全不透明的 Catppuccin 背景
+- LSP 诊断：启动时默认隐藏，按 `Space u d` 按需开启或再次关闭
 
 ## 2. 知识网络与概念解构 (The Knowledge Graph)
 
@@ -354,7 +355,25 @@ vim.opt.pumblend = 0
 
 修改后重启 Neovim 即可生效；当前会话也可执行 `:set pumblend=0` 立即验证。
 
-### 3.9 边界、故障模式与约束
+### 3.9 诊断默认显示状态
+
+LazyVim 默认启用 Neovim 诊断显示，`Space u d` 通过 `Snacks.toggle.diagnostics()` 在开启和关闭之间切换。当前工作流更倾向于按需查看诊断，因此在 `lua/config/options.lua` 中设置启动默认值：
+
+```lua
+vim.diagnostic.enable(false)
+```
+
+该设置只关闭诊断的界面渲染，不会停止 LSP 客户端，也不会删除已产生的诊断数据。需要查看行内文本、标志或下划线时，按 `Space u d` 即可重新开启；再按一次恢复隐藏。
+
+可以检查当前全局状态：
+
+```vim
+:lua print(vim.diagnostic.is_enabled())
+```
+
+启动后预期输出 `false`；按 `Space u d` 后预期输出 `true`。
+
+### 3.10 边界、故障模式与约束
 
 #### 主题选择器会临时改变当前会话
 
@@ -387,7 +406,7 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 
 自动换行可以防止单行被截断，但弹窗最终仍不能超过当前终端尺寸。极长的多行输出更适合在通知历史或 Noice history 中阅读；LazyVim 的 `long_message_to_split` preset 也会把部分长消息转入 split 窗口。
 
-### 3.10 方案对比
+### 3.11 方案对比
 
 | 维度 | Catppuccin Mocha + lualine auto + 双层 slant | Tokyonight Moon + 默认 bufferline | 仅 bufferline `slant` |
 |---|---|---|---|
@@ -548,7 +567,7 @@ Claude 提议修改时会打开 Neovim 原生 Diff。此时可以像普通 Buffe
 3. **管理窗口：** `Ctrl+h/j/k/l` 移动窗口，`Space |` 或 `Space w v` 垂直分屏，`Space -` 或 `Space w s` 水平分屏。
 4. **使用 Git：** `Space g g` 打开 Lazygit，`]h` / `[h` 跳转 Git 修改点，`Space g h p` 预览 Hunk，`Space g b` 查看 Blame。
 5. **使用终端：** `Space f t` 或 `Ctrl+/` 呼出浮动终端。
-6. **处理诊断：** `Space u d` 切换诊断显示，`Space c d` 查看当前报错详情。
+6. **处理诊断：** 启动时默认隐藏诊断；需要时按 `Space u d` 切换显示，按 `Space c d` 查看当前行报错详情。
 7. **使用 AI：** 小范围输入用 Copilot 补全；选区解释用可视模式 `Space a s`；文件级任务先 `Space a b`，再 `Space a f`；所有 Claude 修改都逐个审核 Diff。
 
 ### 认知盲区与反常识点
@@ -559,6 +578,7 @@ Claude 提议修改时会打开 Neovim 原生 Diff。此时可以像普通 Buffe
 - **只打开一个文件时看不到标签栏不一定是配置失败。** bufferline 默认可能隐藏单 Buffer 标签，因此需要设置 `always_show_bufferline = true`。
 - **`:Lazy` 中的空心圆不一定是错误。** 它通常表示插件尚未满足懒加载条件；只有出现错误标记或加载日志异常时才需要排查。
 - **颜色异常不一定来自 Neovim。** 终端是否支持真彩色、字体是否为 Nerd Font，也会直接改变最终观感。
+- **诊断隐藏不等于 LSP 停止。** `vim.diagnostic.enable(false)` 只隐藏诊断的可视提示，跳转、补全、格式化和其他 LSP 功能仍可继续工作。
 
 ## 附录：快捷键速查
 
