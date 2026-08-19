@@ -21,7 +21,7 @@
 
 1. **先准备运行环境，再安装 LazyVim。** Neovim、Git、编译器、Nerd Font、Ripgrep 和 fd 分别承担编辑器运行、插件获取、Treesitter 编译、图标显示和文件/文本搜索职责。
 2. **把 LazyVim Extras 当作语言栈入口。** 在 `:LazyExtras` 中启用语言扩展，通常会联动 LSP、格式化、Treesitter、调试和 Mason 配置。
-3. **把个人修改放进 `lua/plugins/`。** 当前界面配置集中在 `lua/plugins/ui.lua`：主题固定为 Catppuccin Mocha，lualine 使用 `auto` 自动适配主题并采用斜线分隔，bufferline 使用 Catppuccin integration、彩色图标、始终显示和斜角分隔。
+3. **把个人修改放进 `lua/plugins/`。** 当前界面配置集中在 `lua/plugins/ui.lua`：主题固定为 Catppuccin Mocha，lualine 使用 `auto` 自动适配主题并采用斜线分隔，bufferline 使用 Catppuccin integration、彩色图标、始终显示和斜角分隔，Noice 消息通过 Snacks notifier 宽屏换行显示。
 4. **让 Copilot 与 Claude Code 分工。** Copilot 作为 `blink.cmp` 补全源处理输入时的短补全；Claude Code 通过浮动终端、上下文发送和原生 Diff 处理解释、重构、测试与跨文件任务。
 
 ### 当前界面配置的最终效果
@@ -35,6 +35,7 @@
 - 图标：启用彩色文件类型图标
 - 当前 Buffer：使用 Catppuccin 高亮和粗体强调
 - 关闭按钮：隐藏，减少视觉噪声
+- 消息弹窗：最大宽度和高度均为编辑区的 `90%`，长路径与文本自动换行完整显示
 
 ## 2. 知识网络与概念解构 (The Knowledge Graph)
 
@@ -77,6 +78,14 @@
 **文中上下文：** 当前配置通过 Catppuccin 的 `integrations.bufferline = true` 提供 Buffer Tab、图标、诊断和修改状态的统一高亮，不再手动调用内部高亮模块路径。
 
 **实践价值：** 更换主题时，可以优先寻找对应的 bufferline integration，而不是为每个高亮组手动写颜色。
+
+### Noice 与 Snacks 消息链路
+
+**通俗解释：** Noice 负责接管和分类 Neovim 的消息、命令行及通知；当前 LazyVim 版本再把普通消息交给 Snacks notifier 绘制右上角弹窗。
+
+**文中上下文：** 消息是否被路由、合并或保存由 Noice 决定，但弹窗的宽度、高度和换行行为由 `snacks.nvim` 的 `notifier` 与 `notification` style 决定。仅修改 Noice 的 `views.notify` 不一定能改变最终弹窗尺寸。
+
+**实践价值：** 排查消息显示问题时先区分“消息路由”和“弹窗渲染”，再修改真正生效的配置层，避免长路径因默认 `40%` 最大宽度和关闭换行而显示不全。
 
 ## 3. 底层逻辑与技术架构分析 (Deep Dive)
 
@@ -293,7 +302,37 @@ catppuccin-mocha
 slant
 ```
 
-### 3.7 边界、故障模式与约束
+### 3.7 消息弹窗与长文本显示
+
+LazyVim 默认由 Noice 接管消息；在当前插件版本中，Noice 的 `notify` view 优先使用 Snacks backend。Snacks notifier 默认最大宽度为编辑区的 `40%`，且 `notification` style 的 `wrap` 为 `false`，因此长路径或长文本可能在弹窗中被截断。
+
+当前配置在 `lua/plugins/ui.lua` 中覆盖 Snacks：
+
+```lua
+{
+  "folke/snacks.nvim",
+  opts = {
+    notifier = {
+      width = { min = 40, max = 0.9 },
+      height = { min = 1, max = 0.9 },
+    },
+    styles = {
+      notification = {
+        wo = {
+          wrap = true,
+          linebreak = true,
+        },
+      },
+    },
+  },
+}
+```
+
+`max = 0.9` 表示弹窗最多占编辑区对应尺寸的 `90%`；`wrap = true` 让超过窗口宽度的内容继续换行；`linebreak = true` 尽量在合适的文本边界换行。三者配合后，长路径和消息会完整显示，同时仍给主编辑区保留少量可见空间。
+
+若消息已经消失，可按 `Space n` 打开通知历史；Noice 自身的最近消息和历史记录还可分别通过 `Space s n l` 与 `Space s n h` 查看。修改配置后需重启 Neovim，或者重新加载相关插件配置，已有弹窗不会自动采用新尺寸。
+
+### 3.8 边界、故障模式与约束
 
 #### 主题选择器会临时改变当前会话
 
@@ -322,7 +361,11 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 
 主题配色仍会生效，但文件图标、粗竖线或其他特殊字符可能显示成方框。请在终端中配置 Nerd Font，例如 JetBrainsMono Nerd Font。
 
-### 3.8 方案对比
+#### 消息内容过长仍受屏幕物理尺寸限制
+
+自动换行可以防止单行被截断，但弹窗最终仍不能超过当前终端尺寸。极长的多行输出更适合在通知历史或 Noice history 中阅读；LazyVim 的 `long_message_to_split` preset 也会把部分长消息转入 split 窗口。
+
+### 3.9 方案对比
 
 | 维度 | Catppuccin Mocha + lualine auto + 双层 slant | Tokyonight Moon + 默认 bufferline | 仅 bufferline `slant` |
 |---|---|---|---|
