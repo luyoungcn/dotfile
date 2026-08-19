@@ -36,6 +36,7 @@
 - 当前 Buffer：使用 Catppuccin 高亮和粗体强调
 - 关闭按钮：隐藏，减少视觉噪声
 - 消息弹窗：最大宽度和高度均为编辑区的 `90%`，长路径与文本自动换行完整显示
+- 右键与补全菜单：`pumblend = 0`，使用完全不透明的 Catppuccin 背景
 
 ## 2. 知识网络与概念解构 (The Knowledge Graph)
 
@@ -332,7 +333,28 @@ LazyVim 默认由 Noice 接管消息；在当前插件版本中，Noice 的 `not
 
 若消息已经消失，可按 `Space n` 打开通知历史；Noice 自身的最近消息和历史记录还可分别通过 `Space s n l` 与 `Space s n h` 查看。修改配置后需重启 Neovim，或者重新加载相关插件配置，已有弹窗不会自动采用新尺寸。
 
-### 3.8 边界、故障模式与约束
+### 3.8 右键菜单透明度
+
+Neovim 的右键上下文菜单和补全菜单都使用 `Pmenu` 高亮组。LazyVim 默认设置 `pumblend = 10`，会将菜单背景与后方编辑区进行透明混合；文字密集时，两层内容容易视觉重叠。
+
+当前在 `lua/config/options.lua` 中覆盖为：
+
+```lua
+vim.opt.pumblend = 0
+```
+
+`0` 表示不进行背景混合，菜单直接使用 Catppuccin 的 `Pmenu` 实色背景。这个设置会同时影响右键菜单和插入模式补全菜单，但不会改变 Noice/Snacks 消息弹窗的透明度；普通浮动窗口由 `winblend` 或插件自身的 window style 控制。
+
+可以在 Neovim 中查看当前值和高亮组：
+
+```vim
+:set pumblend?
+:hi Pmenu
+```
+
+修改后重启 Neovim 即可生效；当前会话也可执行 `:set pumblend=0` 立即验证。
+
+### 3.9 边界、故障模式与约束
 
 #### 主题选择器会临时改变当前会话
 
@@ -365,7 +387,7 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 
 自动换行可以防止单行被截断，但弹窗最终仍不能超过当前终端尺寸。极长的多行输出更适合在通知历史或 Noice history 中阅读；LazyVim 的 `long_message_to_split` preset 也会把部分长消息转入 split 窗口。
 
-### 3.9 方案对比
+### 3.10 方案对比
 
 | 维度 | Catppuccin Mocha + lualine auto + 双层 slant | Tokyonight Moon + 默认 bufferline | 仅 bufferline `slant` |
 |---|---|---|---|
