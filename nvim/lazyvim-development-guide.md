@@ -9,18 +9,20 @@
 - [1. 核心精髓](#1-核心精髓-tldr)
 - [2. 知识网络与概念解构](#2-知识网络与概念解构-the-knowledge-graph)
 - [3. 底层逻辑与技术架构分析](#3-底层逻辑与技术架构分析-deep-dive)
-- [4. 行动指南与复盘反思](#4-行动指南与复盘反思-actionable-insights)
+- [4. AI 编程助手使用指南](#4-ai-编程助手使用指南)
+- [5. 行动指南与复盘反思](#5-行动指南与复盘反思-actionable-insights)
 - [附录：快捷键速查](#附录快捷键速查)
 
 ## 1. 核心精髓 (TL;DR)
 
-**一句话总结：** LazyVim 提供一套可扩展的 Neovim 基础层；通过 LazyExtras 开启语言能力，通过 `:Lazy` 管理插件，通过稳定的 `<leader>` 快捷键完成搜索、Buffer、窗口、Git、终端和诊断操作，再用 `lua/plugins/` 中的插件规格维护自己的界面配置。
+**一句话总结：** LazyVim 提供一套可扩展的 Neovim 基础层；通过 LazyExtras 开启语言和 AI 能力，通过 `:Lazy` 管理插件，通过稳定的 `<leader>` 快捷键完成搜索、Buffer、窗口、Git、终端、诊断和 AI 协作，再用 `lua/plugins/` 中的插件规格维护自己的配置。
 
 ### Key Takeaways
 
 1. **先准备运行环境，再安装 LazyVim。** Neovim、Git、编译器、Nerd Font、Ripgrep 和 fd 分别承担编辑器运行、插件获取、Treesitter 编译、图标显示和文件/文本搜索职责。
 2. **把 LazyVim Extras 当作语言栈入口。** 在 `:LazyExtras` 中启用语言扩展，通常会联动 LSP、格式化、Treesitter、调试和 Mason 配置。
 3. **把个人修改放进 `lua/plugins/`。** 当前界面配置集中在 `lua/plugins/ui.lua`：主题固定为 Catppuccin Mocha，lualine 使用 `auto` 自动适配主题并采用斜线分隔，bufferline 使用 Catppuccin integration、彩色图标、始终显示和斜角分隔。
+4. **让 Copilot 与 Claude Code 分工。** Copilot 作为 `blink.cmp` 补全源处理输入时的短补全；Claude Code 通过浮动终端、上下文发送和原生 Diff 处理解释、重构、测试与跨文件任务。
 
 ### 当前界面配置的最终效果
 
@@ -330,7 +332,141 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 | 配色一致性 | Catppuccin 提供 bufferline integration | 依赖 Tokyonight 配置 | 主要改变形状，不改变主题 |
 | 视觉复杂度 | 中等、清晰 | 默认、克制 | 更装饰性 |
 
-## 4. 行动指南与复盘反思 (Actionable Insights)
+## 4. AI 编程助手使用指南
+
+### 4.1 当前 AI 配置与分工
+
+当前在 `lazyvim.json` 中启用了两个 LazyVim AI Extra：
+
+| 能力 | 插件/集成 | 适合的任务 | 当前行为 |
+|---|---|---|---|
+| 输入时补全 | GitHub Copilot + `blink.cmp` | 补全一行、函数体、样板代码 | 自动触发，结果进入统一补全菜单 |
+| 对话式编程 | `coder/claudecode.nvim` + Claude Code CLI | 解释代码、重构、修复、测试、跨文件修改 | 在居中浮动终端中运行，可接收 Buffer、选区和文件上下文 |
+
+本地 Claude Code 覆盖配置位于 `lua/plugins/claudecode.lua`。浮窗宽度为编辑区的 `82%`，高度为 `85%`，标题为 `Claude Code`；在其终端中按 `Ctrl+\`，再按 `Ctrl+n` 可隐藏浮窗并返回编辑区。
+
+这两套能力互不替代：写代码时先用 Copilot 降低重复输入；任务需要描述意图、理解上下文、执行命令或修改多个文件时，再交给 Claude Code。
+
+### 4.2 首次使用与状态检查
+
+Claude Code 依赖本机 `claude` 命令。当前环境已安装 Claude Code CLI；若新机器尚未登录，先在终端运行：
+
+```bash
+claude
+```
+
+按 CLI 提示完成 Anthropic 认证。进入 Neovim 后，按 `Space a c` 打开或关闭 Claude Code 浮窗。
+
+Copilot 首次使用需要 GitHub 授权：
+
+```vim
+:Copilot auth
+```
+
+按照提示完成设备授权。状态栏中的 Copilot 图标可反映连接状态；也可运行 `:Copilot auth info` 检查当前账号。AI 插件异常时，先用 `:Lazy` 检查插件加载或更新状态，再用 `:checkhealth` 查看环境问题。
+
+### 4.3 Copilot：随写随用的代码补全
+
+当前 `vim.g.ai_cmp = true`，Copilot 建议由 `blink.cmp` 展示，而不是单独显示为灰色幽灵文本。建议的日常操作如下：
+
+1. 进入插入模式，先写清晰的函数名、类型签名、注释或一小段实现。
+2. 等待统一补全菜单出现；带 Copilot/AI 图标的候选项来自 Copilot。
+3. 使用 `Ctrl+n` / `Ctrl+p` 选择下一个或上一个候选。
+4. 按 `Enter` 接受当前选中的候选；也可按 `Ctrl+y` 直接选择并接受。
+5. 按 `Ctrl+e` 关闭补全菜单；未出现菜单时按 `Ctrl+Space` 手动触发。
+
+| 插入模式操作 | 快捷键 |
+|---|---|
+| 手动显示补全 | `Ctrl+Space` |
+| 下一个/上一个候选 | `Ctrl+n` / `Ctrl+p` |
+| 接受当前候选 | `Enter` |
+| 选择并接受候选 | `Ctrl+y` |
+| 关闭补全菜单 | `Ctrl+e` |
+
+Copilot 对“局部且意图明确”的任务效果最好，例如先写注释 `-- parse config and return validation errors`、测试用例名或带返回类型的函数签名，再让它补全实现。生成后仍需检查边界条件、错误处理、依赖 API 和测试结果。
+
+### 4.4 Claude Code：基础操作与快捷键
+
+以下快捷键以 `<leader> = Space` 为前提，主要在普通模式使用：
+
+| 操作 | 快捷键 | 说明 |
+|---|---|---|
+| 打开/关闭 Claude | `Space a c` | 切换 Claude Code 浮窗 |
+| 聚焦 Claude | `Space a f` | 会话存在时把焦点移到浮窗 |
+| 恢复历史会话 | `Space a r` | 使用 `claude --resume` 选择并恢复会话 |
+| 继续最近会话 | `Space a C` | 使用 `claude --continue` 继续最近会话，注意大写 `C` |
+| 添加当前 Buffer | `Space a b` | 将当前文件加入 Claude 上下文 |
+| 发送可视选区 | 可视模式 `Space a s` | 发送所选代码及行号 |
+| 从文件树添加文件 | 文件树中 `Space a s` | 支持当前配置使用的 Neo-tree |
+| 接受 Claude Diff | `Space a a` | 接受当前提议修改 |
+| 拒绝 Claude Diff | `Space a d` | 拒绝当前提议修改 |
+| 隐藏 Claude 浮窗 | 终端模式 `Ctrl+\`，再按 `Ctrl+n` | 返回原编辑窗口 |
+
+按下 `Space a` 后稍等，WhichKey 会显示当前可用的 AI 子命令。`Space a c` 是开关窗口，`Space a f` 是聚焦已有窗口，两者用途不同。
+
+### 4.5 常用 Case
+
+#### 解释一段代码
+
+1. 用可视模式选中目标代码。
+2. 按 `Space a s` 将选区发送给 Claude。
+3. 按 `Space a f` 聚焦 Claude，再输入“解释这段代码的控制流、隐含假设和边界条件”。
+
+发送选区比只说“解释当前代码”更精确，也能把文件路径和行号一并交给 Claude。
+
+#### 重构当前文件
+
+1. 在目标文件按 `Space a b` 添加整个 Buffer。
+2. 按 `Space a f` 聚焦 Claude。
+3. 明确约束，例如“提取重复逻辑，不改变公共 API；修改后运行现有测试”。
+4. Claude 提交修改后逐个检查 Diff，再用 `Space a a` 接受或 `Space a d` 拒绝。
+
+需求只涉及局部函数时，优先发送选区，避免加入无关上下文；需要理解完整模块时再添加整个 Buffer。
+
+#### 跨文件修改
+
+1. 按 `Space e` 打开 Neo-tree。
+2. 在相关文件上按 `Space a s`，可对多个文件重复操作。
+3. 打开 Claude 后说明目标、兼容性约束和验证命令。
+4. 审核每个文件的 Diff，并在完成后亲自运行测试或构建。
+
+#### 根据报错修复问题
+
+先将报错对应的代码选区发送给 Claude，再在提示中粘贴完整错误信息和复现步骤。一个高质量请求应包含：预期行为、实际行为、最小复现、不能改变的接口，以及应运行的测试命令。
+
+#### 生成或补充测试
+
+添加待测 Buffer 后，要求 Claude 先阅读仓库现有测试风格，再覆盖正常路径、边界输入和失败路径。不要只要求“提高覆盖率”；应指出行为契约，并检查生成的断言是否真正验证结果。
+
+#### 恢复之前的任务
+
+- `Space a C`：直接延续最近一次会话，适合刚刚中断的工作。
+- `Space a r`：从历史会话中选择，适合切回较早的任务。
+
+恢复后先让 Claude 简述当前目标、已完成修改和剩余验证，避免在过期假设上继续编辑。
+
+### 4.6 Diff 审核与安全边界
+
+Claude 提议修改时会打开 Neovim 原生 Diff。此时可以像普通 Buffer 一样检查甚至调整内容：
+
+- `Space a a` 或 `:w`：接受当前 Diff。
+- `Space a d` 或 `:q`：拒绝当前 Diff。
+- `:ClaudeCodeCloseAllDiffs`：清理仍悬挂的待处理 Diff；不会丢弃已经接受并保存的修改。
+
+接受 AI 修改前至少检查公共接口、错误处理、删除内容、依赖变化和测试结果。不要把令牌、私钥、生产数据或未脱敏日志发送给外部 AI 服务；涉及删除、迁移、发布和生产命令时，要求 Claude 先说明计划，并由人确认实际命令和目标范围。
+
+### 4.7 常见问题
+
+| 现象 | 排查方式 |
+|---|---|
+| `Space a c` 无响应 | 用 `:Lazy` 确认 `claudecode.nvim` 已安装；在 shell 中运行 `claude --version` |
+| Claude 浮窗内快捷键像普通文字一样输入 | 当前处于终端插入状态；按 `Ctrl+\`，再按 `Ctrl+n` 隐藏并回到编辑区 |
+| Copilot 没有候选 | 运行 `:Copilot auth info`，确认网络和授权；输入几字符或按 `Ctrl+Space` |
+| 看不到独立灰字建议 | 这是当前配置的预期行为；Copilot 已集成进 `blink.cmp` 菜单 |
+| AI 候选被普通 LSP 候选遮住 | 用 `Ctrl+n` / `Ctrl+p` 浏览候选，并根据 Copilot 图标识别来源 |
+| Diff 窗口残留 | 执行 `:ClaudeCodeCloseAllDiffs`，再检查 `:ClaudeCodeStatus` |
+
+## 5. 行动指南与复盘反思 (Actionable Insights)
 
 ### 安装与初始化
 
@@ -348,6 +484,7 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 4. **使用 Git：** `Space g g` 打开 Lazygit，`]h` / `[h` 跳转 Git 修改点，`Space g h p` 预览 Hunk，`Space g b` 查看 Blame。
 5. **使用终端：** `Space f t` 或 `Ctrl+/` 呼出浮动终端。
 6. **处理诊断：** `Space u d` 切换诊断显示，`Space c d` 查看当前报错详情。
+7. **使用 AI：** 小范围输入用 Copilot 补全；选区解释用可视模式 `Space a s`；文件级任务先 `Space a b`，再 `Space a f`；所有 Claude 修改都逐个审核 Diff。
 
 ### 认知盲区与反常识点
 
@@ -396,6 +533,19 @@ Neo-tree 中：`a` 新建文件/文件夹，`A` 递归新建，`d` 删除，`r` 
 | 开关诊断 | `Space u d` |
 | 查看诊断详情 | `Space c d` |
 | 预览窗口向下/向上滚动 | `Ctrl+f/d` / `Ctrl+b/u` |
+
+### AI 编程助手
+
+| 操作 | 快捷键 |
+|---|---|
+| 开关/聚焦 Claude | `Space a c` / `Space a f` |
+| 添加当前 Buffer | `Space a b` |
+| 发送选区或文件树中的文件 | `Space a s` |
+| 恢复历史/继续最近 Claude 会话 | `Space a r` / `Space a C` |
+| 接受/拒绝 Claude Diff | `Space a a` / `Space a d` |
+| 隐藏 Claude 浮窗 | `Ctrl+\`，再按 `Ctrl+n` |
+| Copilot 下一个/上一个候选 | `Ctrl+n` / `Ctrl+p` |
+| 接受/关闭补全 | `Enter` 或 `Ctrl+y` / `Ctrl+e` |
 
 ---
 
