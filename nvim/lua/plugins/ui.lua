@@ -1,25 +1,5 @@
 return {
-  -- 1. 告诉 LazyVim 默认全局配色为 catppuccin
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "catppuccin",
-    },
-  },
-
-  -- 2. Catppuccin 主题配置：开启 integrations 自动注入
-  {
-    "catppuccin/nvim",
-    name = "catppuccin",
-    opts = {
-      flavour = "mocha",
-      integrations = {
-        lualine = true, -- 💡 开启后自动为 lualine 适配配色
-      },
-    },
-  },
-
-  -- 3. Lualine 状态栏（使用 auto 自动识别主题，消除 Theme not found 告警）
+  -- 1. Lualine 状态栏（使用 auto 自动识别主题，消除 Theme not found 告警）
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
@@ -32,7 +12,7 @@ return {
     end,
   },
 
-  -- 4. Noice 通过 Snacks 显示消息：放宽弹窗并换行，避免长路径被截断
+  -- 2. Noice 通过 Snacks 显示消息：放宽弹窗并换行，避免长路径被截断
   {
     "folke/snacks.nvim",
     opts = {
