@@ -517,6 +517,16 @@ bind g display-popup -E -w 80% -h 80% "$SHELL"
 # 如果你喜欢在浮动窗用 lazygit，可以再加一行：
 bind C-g display-popup -E -w 85% -h 85% "lazygit"
 
+# Arrow style
+# tmux_conf_theme_left_separator_main=''
+# tmux_conf_theme_right_separator_main=''
+# tmux_conf_theme_left_separator_sub=''
+# tmux_conf_theme_right_separator_sub=''
+# Round style
+# tmux_conf_theme_left_separator_main=''
+# tmux_conf_theme_right_separator_main=''
+# tmux_conf_theme_left_separator_sub=''
+# tmux_conf_theme_right_separator_sub=''
 # Slant style
 tmux_conf_theme_left_separator_main=''
 tmux_conf_theme_right_separator_main=''
