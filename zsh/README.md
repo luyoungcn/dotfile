@@ -1,12 +1,14 @@
 # Zsh Configuration
 
 本目录包含 zsh 配置文件，通过 `install.sh` 以符号链接方式部署到 `~/.zshrc` 和 `~/.p10k.zsh`。
+Starship 配置位于 [`../starship/README.md`](../starship/README.md)，并链接到
+`${XDG_CONFIG_HOME:-~/.config}/starship.toml`。
 
 ## 文件说明
 
 | 文件 | 部署位置 | 说明 |
 |------|---------|------|
-| `zshrc` | `~/.zshrc` | zsh 主配置文件（Oh My Zsh + 插件 + 别名 + 代理函数） |
+| `zshrc` | `~/.zshrc` | zsh 主配置文件（Oh My Zsh + 插件 + 别名 + 代理函数 + Starship/P10k 回退） |
 | `p10k.zsh` | `~/.p10k.zsh` | Powerlevel10k 主题配置文件 |
 
 ## 依赖安装
@@ -65,9 +67,27 @@ git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git \
   ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 ```
 
-本配置已设置 `ZSH_THEME="powerlevel10k/powerlevel10k"`。首次启动终端时会自动引导你配置 Powerlevel10k，也可以随时运行 `p10k configure` 重新配置。
+Starship 已作为首选提示符接入 `zshrc`；检测到 `starship` 命令时会自动停用
+P10k。P10k 文件仍保留，作为 Starship 不可用时的回退方案。
 
-### 4. 安装 zsh-autosuggestions（命令提示插件）
+### 4. 安装 Starship（推荐提示符）
+
+官方安装脚本（安装前请查看脚本内容，并按你的系统包管理策略选择方式）：
+
+```bash
+curl -sS https://starship.rs/install.sh | sh
+```
+
+也可以使用发行版包管理器或 Cargo 安装。确认安装成功：
+
+```bash
+starship --version
+```
+
+本仓库的 `install.sh` 会将 `starship/starship.toml` 链接到
+`${XDG_CONFIG_HOME:-~/.config}/starship.toml`，然后执行 `exec zsh` 即可生效。
+
+### 5. 安装 zsh-autosuggestions（命令提示插件）
 
 输入命令时自动推测你可能需要的命令，按右键快速采用建议：
 
@@ -80,7 +100,7 @@ git clone https://github.moeyy.xyz/https://github.com/zsh-users/zsh-autosuggesti
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 ```
 
-### 5. 安装 zsh-syntax-highlighting（语法高亮插件）
+### 6. 安装 zsh-syntax-highlighting（语法高亮插件）
 
 ```bash
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
@@ -91,7 +111,7 @@ git clone https://github.moeyy.xyz/https://github.com/zsh-users/zsh-syntax-highl
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
-### 6. 内置插件说明（无需额外安装）
+### 7. 内置插件说明（无需额外安装）
 
 以下插件由 Oh My Zsh 内置，配置中已启用，无需额外安装：
 
@@ -167,13 +187,16 @@ sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
   ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
-# 5. 安装插件
+# 5. 安装 Starship（推荐提示符）
+curl -sS https://starship.rs/install.sh | sh
+
+# 6. 安装插件
 git clone https://github.com/zsh-users/zsh-autosuggestions \
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
-# 6. 部署配置文件
+# 7. 部署配置文件
 cd ~/Document/dotfile
 ./install.sh
 ```

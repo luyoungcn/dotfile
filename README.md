@@ -6,11 +6,13 @@ Personal Neovim, tmux, and zsh configuration.
 
 - `nvim/`: LazyVim configuration, imported with its original Git history.
 - `tmux/tmux.conf.local`: personal overrides for oh-my-tmux.
+- `starship/starship.toml`: One Dark, two-line Starship prompt configuration.
 - `zsh/zshrc`: zsh configuration (Oh My Zsh + plugins + aliases + proxy).
 - `zsh/p10k.zsh`: Powerlevel10k theme configuration.
 - `install.sh`: idempotent installer for configuration symlinks, oh-my-tmux, and zsh.
 
 See [`zsh/README.md`](zsh/README.md) for zsh dependency installation.
+See [`starship/README.md`](starship/README.md) for prompt design and rollout.
 See [`nvim/README.md`](nvim/README.md) for Neovim setup details.
 
 ## Install
@@ -31,10 +33,9 @@ Edit files through either their repository paths or the links under
 `~/.config`, then commit normally:
 
 ```sh
-git add nvim tmux zsh
+git add nvim tmux zsh starship
 git commit
 ```
 
 The LazyVim Starter remote is recorded as `lazyvim-upstream`. Fetching it is
 safe, but upstream changes should be reviewed before being merged.
-

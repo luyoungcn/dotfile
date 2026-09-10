@@ -52,6 +52,7 @@ git -C "$oh_my_tmux_dir" checkout --quiet --detach "$oh_my_tmux_ref"
 link_config "$repo_dir/nvim" "$config_dir/nvim"
 link_config "$oh_my_tmux_dir/.tmux.conf" "$config_dir/tmux/tmux.conf"
 link_config "$repo_dir/tmux/tmux.conf.local" "$config_dir/tmux/tmux.conf.local"
+link_config "$repo_dir/starship/starship.toml" "$config_dir/starship.toml"
 link_config "$repo_dir/zsh/zshrc" "$HOME/.zshrc"
 link_config "$repo_dir/zsh/p10k.zsh" "$HOME/.p10k.zsh"
 
