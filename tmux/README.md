@@ -49,3 +49,16 @@ plugins elsewhere.
 The prefix is `Ctrl-a`. After the prefix, `|` splits horizontally and `-` splits
 vertically; `h`, `j`, `k`, and `l` navigate panes, while `H`, `J`, `K`, and `L`
 resize the active pane. `r` reloads the linked `tmux.conf`.
+
+## Pane Zoom and Historical Maximize Behavior
+
+This configuration uses tmux's built-in pane zoom: `Ctrl-a z` runs
+`resize-pane -Z`, so the active pane fills its current window and the same
+shortcut restores the previous layout. `Ctrl-a +` is intentionally unbound.
+
+For reference, oh-my-tmux used `prefix +` for a different operation. It moved
+the active pane into a separate window and used the same shortcut to restore it
+to the source window. Unlike `resize-pane -Z`, that approach allowed further
+splitting inside the maximized window and preserved the maximized pane while
+switching between windows. That historical behavior is documented here only;
+it is not a dependency of this standalone configuration.
