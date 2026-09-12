@@ -6,3 +6,6 @@ secrets.*
 *.secret
 .DS_Store
 *~
+
+# tmux client debug logs generated during local sessions.
+tmux-client-*.log
