@@ -126,11 +126,11 @@ export PATH="$PATH:/snap/bin"
 
 # DeepSeek / Claude Code 通用非敏感配置
 export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
-export ANTHROPIC_MODEL="deepseek-v4.1-pro[1m]"
-export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4.1-pro[1m]"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4.1-pro[1m]"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4.1-flash"
-export CLAUDE_CODE_SUBAGENT_MODEL="deepseek-v4.1-flash"
+export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash"
+export CLAUDE_CODE_SUBAGENT_MODEL="deepseek-v4-flash"
 export CLAUDE_CODE_EFFORT_LEVEL="max"
 export CLAUDE_CODE_AUTO_COMPACT_WINDOW="786432"
 
