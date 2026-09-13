@@ -66,11 +66,19 @@ install_tpm
 link_config "$repo_dir/nvim" "$config_dir/nvim"
 link_config "$repo_dir/tmux/tmux.conf" "$config_dir/tmux/tmux.conf"
 link_config "$repo_dir/tmux/colors.conf" "$config_dir/tmux/colors.conf"
+link_config "$repo_dir/fish/config.fish" "$config_dir/fish/config.fish"
+for fish_file in "$repo_dir"/fish/conf.d/*.fish; do
+  fish_name=${fish_file##*/}
+  link_config "$fish_file" "$config_dir/fish/conf.d/$fish_name"
+done
+link_config "$repo_dir/fish/functions/_tide_item_nvm.fish" "$config_dir/fish/functions/_tide_item_nvm.fish"
+link_config "$repo_dir/fish/fish_plugins" "$config_dir/fish/fish_plugins"
 link_config "$repo_dir/starship/starship.toml" "$config_dir/starship.toml"
 link_config "$repo_dir/zsh/zshrc" "$HOME/.zshrc"
 link_config "$repo_dir/zsh/p10k.zsh" "$HOME/.p10k.zsh"
 
 printf 'Dotfiles installed.\n'
 printf 'TPM plugins:           %s\n' "$tmux_plugin_dir"
+printf 'Fish config:           %s\n' "$config_dir/fish"
 printf 'Reload tmux with:  tmux source-file %s\n' "$config_dir/tmux/tmux.conf"
 printf 'Reload zsh with:   exec zsh\n'

@@ -2,7 +2,7 @@
 
 > 一份面向日常开发的 LazyVim 安装、插件管理、快捷键与界面定制指南。
 >
-> 当前配置基线：**Catppuccin Mocha + 自动适配的 Catppuccin 状态栏 + 状态栏斜线分隔 + bufferline 顶部 Buffer Tab 斜角分隔**。
+> 当前配置基线：**Catppuccin Mocha + 自定义 lualine 状态栏 + bufferline 顶部 Buffer Tab 细线分隔**。
 
 ## 目录
 
@@ -21,7 +21,7 @@
 
 1. **先准备运行环境，再安装 LazyVim。** Neovim、Git、编译器、Nerd Font、Ripgrep 和 fd 分别承担编辑器运行、插件获取、Treesitter 编译、图标显示和文件/文本搜索职责。
 2. **把 LazyVim Extras 当作语言栈入口。** 在 `:LazyExtras` 中启用语言扩展，通常会联动 LSP、格式化、Treesitter、调试和 Mason 配置。
-3. **把个人修改放进 `lua/plugins/`。** 当前界面配置集中在 `lua/plugins/ui.lua`：主题固定为 Catppuccin Mocha，lualine 使用 `auto` 自动适配主题并采用斜线分隔，bufferline 使用 Catppuccin integration、彩色图标、始终显示和斜角分隔，Noice 消息通过 Snacks notifier 宽屏换行显示。
+3. **把个人修改放进 `lua/plugins/`。** 当前界面配置分布在 `lua/plugins/catppuccin.lua`、`lualine.lua`、`bufferline.lua` 和 `ui.lua`：主题固定为 Catppuccin Mocha，lualine 使用自定义无背景组件和细线分隔，bufferline 使用细线分隔与始终显示，Noice 消息通过 Snacks notifier 宽屏换行显示。
 4. **让 Copilot 与 Claude Code 分工。** Copilot 作为 `blink.cmp` 补全源处理输入时的短补全；Claude Code 通过浮动终端、上下文发送和原生 Diff 处理解释、重构、测试与跨文件任务。
 
 ### 当前界面配置的最终效果
@@ -29,8 +29,8 @@
 - 颜色主题：`catppuccin-mocha`
 - 底部 Status Line：lualine 使用 `auto` 自动适配 Catppuccin
 - 顶部 Buffer Tab：`bufferline.nvim`
-- Status Line 分隔符：lualine 的 `` / `` 斜线风格
-- Buffer Tab 分隔符：`slant`，即梯形斜角风格
+- Status Line 分隔符：lualine 自定义的 `│` 细线分隔
+- Buffer Tab 分隔符：`thin`，即细线风格
 - Buffer Tab：始终显示，即使只打开一个文件也可见
 - 图标：启用彩色文件类型图标
 - 当前 Buffer：使用 Catppuccin 高亮和粗体强调
@@ -187,7 +187,16 @@ nvim
 
 ### 3.5 当前 Buffer Tab 配置
 
-文件位置：`~/.config/nvim/lua/plugins/ui.lua`
+当前配置分为四个文件：`lua/plugins/catppuccin.lua` 负责主题，
+`lua/plugins/lualine.lua` 负责底部状态栏，`lua/plugins/bufferline.lua` 负责
+顶部 Buffer Tab，`lua/plugins/ui.lua` 负责 Snacks/Noice 通知样式。
+
+当前生效的关键选项是：Catppuccin `mocha`、lualine 自定义无背景组件、
+lualine 组件间 `│` 分隔、bufferline `separator_style = "thin"`、始终显示
+Buffer Tab，以及 Snacks 通知最大宽高 `90%` 并启用换行。
+
+下面的旧版合并示例仅用于理解 LazyVim 的插件规格写法，不代表当前文件
+布局或当前分隔符配置；修改时应以上述四个仓库文件为准。
 
 ```lua
 return {
@@ -213,8 +222,8 @@ return {
     opts = function(_, opts)
       opts.options = vim.tbl_deep_extend("force", opts.options or {}, {
         theme = "auto",
-        section_separators = { left = "", right = "" },
-        component_separators = { left = "", right = "" },
+        section_separators = "",
+        component_separators = "",
       })
     end,
   },
@@ -222,7 +231,7 @@ return {
     "akinsho/bufferline.nvim",
     opts = function(_, opts)
       opts.options = vim.tbl_deep_extend("force", opts.options or {}, {
-        separator_style = "slant",
+        separator_style = "thin",
         color_icons = true,
         always_show_bufferline = true,
         show_buffer_close_icons = false,
@@ -242,9 +251,8 @@ return {
 |---|---|
 | `colorscheme = "catppuccin"` | 将 LazyVim 默认主题切换为 Catppuccin |
 | `flavour = "mocha"` | 固定为深色的 Catppuccin Mocha 风格 |
-| `section_separators` | 使用斜线分隔 lualine 状态栏的主要区段 |
-| `component_separators` | 使用细斜线分隔 lualine 状态栏组件 |
-| `separator_style = "slant"` | 使用梯形斜角风格分隔顶部 Buffer Tab |
+| `section_separators` / `component_separators` | 当前由 `lualine.lua` 设为空字符串，再由自定义组件输出 `│` |
+| `separator_style = "thin"` | 使用细线风格分隔顶部 Buffer Tab |
 | `color_icons = true` | 启用文件类型图标的颜色 |
 | `always_show_bufferline = true` | 只有一个 Buffer 时也显示顶部标签栏 |
 | `indicator = { style = "icon", icon = "▎" }` | 用粗竖线强调当前 Buffer |
@@ -254,13 +262,14 @@ return {
 
 #### 分隔符名称的视觉含义
 
-需要注意：本配置同时使用两种斜线配置：lualine 通过 Powerline 字符（`` / ``）配置底部状态栏，bufferline 通过 `separator_style = "slant"` 配置顶部梯形斜角标签。
+当前配置不再使用 lualine 的 Powerline 斜线或 bufferline 的 `slant` 样式；两者
+均采用简洁的无背景/细线视觉语言。
 
-lualine 使用：
+lualine 的实际入口是 `lua/plugins/lualine.lua`，主要设置包括：
 
 ```lua
-opts.options.section_separators = { left = "", right = "" }
-opts.options.component_separators = { left = "", right = "" }
+opts.options.component_separators = ""
+opts.options.section_separators = ""
 ```
 
 常用候选值：
@@ -290,7 +299,7 @@ LazyVim 的默认颜色主题是 Tokyonight；仅安装 Catppuccin 插件并不�
 catppuccin-mocha
 ```
 
-若输出 `tokyonight-moon`，说明当前启动配置仍使用 LazyVim 默认主题，优先检查 `lua/plugins/ui.lua` 是否包含 LazyVim 主题覆盖配置，并完全退出后重新启动 Neovim。
+若输出 `tokyonight-moon`，说明当前启动配置仍使用 LazyVim 默认主题，优先检查 `lua/plugins/catppuccin.lua` 是否包含 LazyVim 主题覆盖配置，并完全退出后重新启动 Neovim。
 
 也可以检查 bufferline 的关键设置：
 
@@ -301,7 +310,7 @@ catppuccin-mocha
 预期结果：
 
 ```text
-slant
+thin
 ```
 
 ### 3.7 消息弹窗与长文本显示
@@ -408,13 +417,13 @@ Catppuccin 使用终端的真彩色能力。若终端未开启 24-bit color，�
 
 ### 3.11 方案对比
 
-| 维度 | Catppuccin Mocha + lualine auto + 双层 slant | Tokyonight Moon + 默认 bufferline | 仅 bufferline `slant` |
+| 维度 | Catppuccin Mocha + 自定义 lualine + thin bufferline | Tokyonight Moon + 默认 bufferline | 仅 bufferline `slant` |
 |---|---|---|---|
 | 主题 | 柔和深色、低刺激 | 深色蓝紫调 | 取决于外层主题 |
-| 标签分隔 | 顶部梯形斜角；底部状态栏斜线 | 默认样式 | 顶部梯形斜角 |
+| 标签分隔 | 顶部细线；底部 `│` 细线 | 默认样式 | 顶部梯形斜角 |
 | 单 Buffer 可见性 | 是 | 由默认配置决定 | 由 `always_show_bufferline` 决定 |
 | 配色一致性 | Catppuccin 提供 bufferline integration | 依赖 Tokyonight 配置 | 主要改变形状，不改变主题 |
-| 视觉复杂度 | 中等、清晰 | 默认、克制 | 更装饰性 |
+| 视觉复杂度 | 低、中性、清晰 | 默认、克制 | 更装饰性 |
 
 ## 4. AI 编程助手使用指南
 
@@ -558,7 +567,7 @@ Claude 提议修改时会打开 Neovim 原生 Diff。此时可以像普通 Buffe
 2. **备份现有目录。** 先处理 `~/.config/nvim`、`~/.local/share/nvim`、`~/.local/state/nvim` 和 `~/.cache/nvim`，再克隆 Starter。
 3. **完成首次插件安装。** 启动 Neovim，等待 `:Lazy` 任务完成，退出并重新启动。
 4. **开启语言扩展。** 使用 `:LazyExtras` 开启目标语言，例如 `lang.python` 或 `lang.clangd`。
-5. **固定个人配置。** 将主题、bufferline 和其他 UI 修改放在 `lua/plugins/ui.lua`，不要直接改 LazyVim 安装目录。
+5. **固定个人配置。** 将主题、lualine、bufferline 和其他 UI 修改分别放在 `lua/plugins/catppuccin.lua`、`lualine.lua`、`bufferline.lua` 和 `ui.lua`，不要直接改 LazyVim 安装目录。
 
 ### 日常工作流
 
@@ -573,7 +582,7 @@ Claude 提议修改时会打开 Neovim 原生 Diff。此时可以像普通 Buffe
 ### 认知盲区与反常识点
 
 - **顶部“Tab”不一定是 Vim Tab。** LazyVim 顶部显示的是 Buffer Tab，和 `:tabnew` 创建的 Tab 页面不是同一个概念。
-- **底部状态栏和顶部 Buffer Tab 都可以使用 slant，但配置入口不同。** lualine 通过 Powerline 字符配置斜线；bufferline 通过 `separator_style` 配置标签形状。
+- **底部状态栏和顶部 Buffer Tab 是两套配置。** 当前 lualine 使用自定义 `│` 细线组件，bufferline 使用 `separator_style = "thin"`。
 - **安装主题不等于启用主题。** Catppuccin 插件存在于运行环境中，不代表当前主题已经切换；必须检查 `vim.g.colors_name`。
 - **只打开一个文件时看不到标签栏不一定是配置失败。** bufferline 默认可能隐藏单 Buffer 标签，因此需要设置 `always_show_bufferline = true`。
 - **`:Lazy` 中的空心圆不一定是错误。** 它通常表示插件尚未满足懒加载条件；只有出现错误标记或加载日志异常时才需要排查。

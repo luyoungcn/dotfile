@@ -1,6 +1,7 @@
 # Zsh Configuration
 
 本目录包含 zsh 配置文件，通过 `install.sh` 以符号链接方式部署到 `~/.zshrc` 和 `~/.p10k.zsh`。
+本仓库不会自动修改默认登录 Shell；bash 用户可以继续使用 bash，zsh 用户无需再次执行 `chsh`。
 Starship 配置位于 [`../starship/README.md`](../starship/README.md)，并链接到
 `${XDG_CONFIG_HOME:-~/.config}/starship.toml`。
 
@@ -25,7 +26,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install zsh git curl -y
 ```
 
-设置默认终端为 zsh（**不要使用 sudo**），然后注销并重新登录使更改生效：
+如果你确实希望把 zsh 设为默认登录 Shell（这是可选操作，**不要使用 sudo**），然后注销并重新登录：
 
 ```bash
 chsh -s /bin/zsh
@@ -135,7 +136,7 @@ git clone https://github.moeyy.xyz/https://github.com/zsh-users/zsh-syntax-highl
 
 本配置提供了 `proxy` / `unproxy` 函数，自动检测 Windows 宿主机 IP 并设置代理环境变量。
 
-默认代理端口为 `10811`，如需修改请编辑 `zshrc` 中 `proxy()` 函数内的 `proxy_port` 变量。
+默认代理端口为 `7899`，如需修改请编辑 `zshrc` 中 `proxy()` 函数内的 `proxy_port` 变量。
 
 ```bash
 # 开启代理
@@ -176,8 +177,8 @@ export ANTHROPIC_AUTH_TOKEN="sk-xxxxxxxx"
 # 1. 安装系统依赖
 sudo apt update && sudo apt install zsh git curl -y
 
-# 2. 设置默认 shell
-chsh -s $(which zsh)
+# 2. （可选）设置默认 shell；不执行也不影响本仓库配置
+# chsh -s "$(which zsh)"
 # 注销并重新登录
 
 # 3. 安装 Oh My Zsh

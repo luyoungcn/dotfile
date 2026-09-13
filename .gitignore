@@ -1,4 +1,5 @@
-# zsh is intentionally outside the scope of this repository for now.
+# The zsh home entry point is managed by install.sh; keep any unrelated local
+# copy out of the repository if one is created at the repository root.
 /.zshrc
 
 # Local secrets and editor/OS artifacts.

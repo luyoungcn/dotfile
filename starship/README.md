@@ -13,7 +13,7 @@
 | 快速判断仓库状态 | 分支、未跟踪、修改、暂存、冲突、领先/落后数量直接显示 |
 | 减少噪声 | 语言版本只在对应项目中出现；命令耗时只显示超过 2 秒的命令 |
 | 适配日常开发 | Python 虚拟环境、Node/Rust/Go 版本、后台任务和远程 SSH 上下文可见 |
-| 控制启动开销 | `scan_timeout = 30`、`command_timeout = 1000`，避免提示符阻塞命令行 |
+| 控制启动开销 | `scan_timeout = 50`、`command_timeout = 1000`，避免提示符阻塞命令行 |
 
 配置文件位于 [`starship.toml`](starship.toml)，安装脚本会把它链接到
 `${XDG_CONFIG_HOME:-~/.config}/starship.toml`。
