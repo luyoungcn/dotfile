@@ -3,6 +3,8 @@
 Personal Linux/WSL development-environment configuration for Neovim, tmux,
 zsh, optional interactive Fish, Starship, and i3-related desktop tools.
 
+![最终配置展示](assets/showcase.png)
+
 ## Architecture
 
 This repository uses explicit configuration files and manual symbolic links.
