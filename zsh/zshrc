@@ -85,7 +85,12 @@ fi
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 # plugins=(git zsh-autosuggestions zsh-syntax-highlighting docker npm)
-plugins=(git colored-man-pages colorize cp man command-not-found sudo suse ubuntu archlinux zsh-navigation-tools z extract history-substring-search python zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git colored-man-pages colorize cp man command-not-found sudo zsh-navigation-tools z extract history-substring-search python zsh-autosuggestions zsh-syntax-highlighting)
+
+# 发行版专属的包管理器插件仅在 Linux 下加载，避免在其它系统产生无意义的命令或警告。
+if [[ "$OSTYPE" == linux* ]]; then
+  plugins+=(suse ubuntu archlinux)
+fi
 
 source $ZSH/oh-my-zsh.sh
 
@@ -117,7 +122,10 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-export PATH="$PATH:/snap/bin"
+# Ubuntu snap tools; only add the directory when it actually exists.
+if [ -d /snap/bin ]; then
+  export PATH="$PATH:/snap/bin"
+fi
 
 
 
@@ -139,45 +147,49 @@ if [ -f "$HOME/.zshenv.local" ]; then
     source "$HOME/.zshenv.local"
 fi
 
-# 定义 WSL 代理开关函数
-proxy () {
-    # 动态获取最新的 Windows 宿主机 IP
-    local host_ip=$(ip route | grep default | awk '{print $3}')
+# 定义 WSL 代理开关函数（仅在 WSL 环境下加载，避免在非 WSL 平台产生无意义命令）
+if [ -r /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
 
-    if [ -z "$host_ip" ]; then
-        # 兼容备用方案：从 /etc/resolv.conf 获取
-        host_ip=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}')
-    fi
+  proxy () {
+      # 动态获取最新的 Windows 宿主机 IP
+      local host_ip=$(ip route | grep default | awk '{print $3}')
 
-    if [ -z "$host_ip" ]; then
-        echo "Error: Unable to detect Windows Host IP."
-        return 1
-    fi
+      if [ -z "$host_ip" ]; then
+          # 兼容备用方案：从 /etc/resolv.conf 获取
+          host_ip=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}')
+      fi
 
-    # 代理服务端口（请确认与 Windows 代理软件设置一致）
-    local proxy_port="7899"
-    local proxy_url="http://${host_ip}:${proxy_port}"
+      if [ -z "$host_ip" ]; then
+          echo "Error: Unable to detect Windows Host IP."
+          return 1
+      fi
 
-    # 同时导出大小写环境变量，确保覆盖所有命令行工具
-    export http_proxy="$proxy_url"
-    export https_proxy="$proxy_url"
-    export all_proxy="$proxy_url"
-    export HTTP_PROXY="$proxy_url"
-    export HTTPS_PROXY="$proxy_url"
-    export ALL_PROXY="$proxy_url"
+      # 代理服务端口（请确认与 Windows 代理软件设置一致）
+      local proxy_port="7899"
+      local proxy_url="http://${host_ip}:${proxy_port}"
 
-    echo "Proxy enabled -> Windows Host: ${host_ip}:${proxy_port}"
+      # 同时导出大小写环境变量，确保覆盖所有命令行工具
+      export http_proxy="$proxy_url"
+      export https_proxy="$proxy_url"
+      export all_proxy="$proxy_url"
+      export HTTP_PROXY="$proxy_url"
+      export HTTPS_PROXY="$proxy_url"
+      export ALL_PROXY="$proxy_url"
 
-    # 快速测试连通性（可选项）
-    curl -I -s --connect-timeout 2 https://www.google.com | head -n 1
-}
+      echo "Proxy enabled -> Windows Host: ${host_ip}:${proxy_port}"
 
-unproxy () {
-    # 批量取消代理环境变量
-    unset http_proxy https_proxy all_proxy
-    unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
-    echo "Proxy disabled."
-}
+      # 快速测试连通性（可选项）
+      curl -I -s --connect-timeout 2 https://www.google.com | head -n 1
+  }
+
+  unproxy () {
+      # 批量取消代理环境变量
+      unset http_proxy https_proxy all_proxy
+      unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
+      echo "Proxy disabled."
+  }
+
+fi
 
 # Docker SDK 快速启动与进入工具函数
 denter() {
@@ -222,7 +234,7 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$HOME/.local/bin:$PATH"
 
 # >>> Codex installer >>>
-export PATH="/home/luyang/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 # <<< Codex installer <<<
 
 # 修改自动补全建议的颜色（例如设置为浅灰色或天蓝色）

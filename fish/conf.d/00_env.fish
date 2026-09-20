@@ -1,12 +1,20 @@
 # Keep Fish-only environment setup separate from bash/zsh configuration.
 status is-interactive; or return
 
-fish_add_path --global "$HOME/.local/bin" /snap/bin "$HOME/.cargo/bin"
+fish_add_path --global "$HOME/.local/bin" "$HOME/.cargo/bin"
+
+# snap is Ubuntu-specific; only add the directory when it actually exists.
+if test -d /snap/bin
+    fish_add_path --global /snap/bin
+end
 
 set -gx NVM_DIR "$HOME/.nvm"
 
 # Resolve the WSL host gateway lazily for the proxy helpers.
-if type -q ip
-    set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
-    test -n "$gateway"; and set -gx host_ip $gateway
+# /proc/version only exists on Linux; the "microsoft" marker identifies WSL.
+if test -r /proc/version; and grep -qi microsoft /proc/version
+    if type -q ip
+        set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
+        test -n "$gateway"; and set -gx host_ip $gateway
+    end
 end

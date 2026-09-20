@@ -5,6 +5,8 @@
 # Local secrets and editor/OS artifacts.
 secrets.*
 *.secret
+# Machine-specific overrides (e.g. ~/.zshenv.local) are never committed.
+*.local
 .DS_Store
 *~
 

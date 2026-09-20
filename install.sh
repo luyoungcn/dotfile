@@ -1,7 +1,9 @@
 #!/bin/sh
+# Portable installer: POSIX sh only. No GNU `--` flags and no `readlink -f`,
+# so the same script runs unchanged on Linux and other Unix-like systems.
 set -eu
 
-repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repo_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
 config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}
 tmux_plugin_dir=${TMUX_PLUGIN_MANAGER_PATH:-"$config_dir/tmux/plugins"}
 timestamp=$(date +%Y%m%d-%H%M%S)
@@ -14,7 +16,7 @@ backup_target() {
     backup="${backup}-1"
   done
 
-  mv -- "$target" "$backup"
+  mv "$target" "$backup"
   printf 'Backed up %s to %s\n' "$target" "$backup"
 }
 
@@ -22,9 +24,11 @@ link_config() {
   source_path=$1
   target_path=$2
 
-  mkdir -p -- "$(dirname -- "$target_path")"
+  mkdir -p "$(dirname "$target_path")"
 
-  if [ -L "$target_path" ] && [ "$(readlink -f -- "$target_path")" = "$(readlink -f -- "$source_path")" ]; then
+  # The link stores source_path verbatim (it is always absolute here), so
+  # comparing the raw link target is enough and avoids GNU `readlink -f`.
+  if [ -L "$target_path" ] && [ "$(readlink "$target_path")" = "$source_path" ]; then
     printf 'Already linked: %s\n' "$target_path"
     return
   fi
@@ -33,7 +37,7 @@ link_config() {
     backup_target "$target_path"
   fi
 
-  ln -s -- "$source_path" "$target_path"
+  ln -s "$source_path" "$target_path"
   printf 'Linked %s -> %s\n' "$target_path" "$source_path"
 }
 
@@ -45,13 +49,13 @@ install_tpm() {
     return
   fi
 
-  # Do not overwrite an unrelated directory.  Moving it to a timestamped
+  # Do not overwrite an unrelated directory. Moving it to a timestamped
   # backup keeps the install reversible and follows the link backup policy.
   if [ -e "$tpm_dir" ] || [ -L "$tpm_dir" ]; then
     backup_target "$tpm_dir"
   fi
 
-  mkdir -p -- "$tmux_plugin_dir"
+  mkdir -p "$tmux_plugin_dir"
   git clone --depth 1 https://github.com/tmux-plugins/tpm.git "$tpm_dir"
   printf 'Installed TPM to %s\n' "$tpm_dir"
 }

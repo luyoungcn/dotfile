@@ -1,26 +1,29 @@
 status is-interactive; or return
 
-function proxy_on
-    if not set -q host_ip
-        set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
-        if test -z "$gateway"
-            echo "Unable to determine the WSL host gateway." >&2
-            return 1
+# WSL 代理开关：仅在 WSL 环境下定义，避免在其他平台产生无效命令。
+if test -r /proc/version; and grep -qi microsoft /proc/version
+    function proxy_on
+        if not set -q host_ip
+            set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
+            if test -z "$gateway"
+                echo "Unable to determine the WSL host gateway." >&2
+                return 1
+            end
+            set -gx host_ip $gateway
         end
-        set -gx host_ip $gateway
+
+        set -gx http_proxy "http://$host_ip:7897"
+        set -gx https_proxy "http://$host_ip:7897"
+        set -gx all_proxy "socks5://$host_ip:7897"
+        echo "Proxy environment variables set pointing to Windows host ($host_ip:7897)."
     end
 
-    set -gx http_proxy "http://$host_ip:7897"
-    set -gx https_proxy "http://$host_ip:7897"
-    set -gx all_proxy "socks5://$host_ip:7897"
-    echo "Proxy environment variables set pointing to Windows host ($host_ip:7897)."
-end
-
-function proxy_off
-    set -e http_proxy
-    set -e https_proxy
-    set -e all_proxy
-    echo "Proxy environment variables removed."
+    function proxy_off
+        set -e http_proxy
+        set -e https_proxy
+        set -e all_proxy
+        echo "Proxy environment variables removed."
+    end
 end
 
 function bst_sdk_25.2.0
@@ -38,8 +41,8 @@ end
 function y
     set -l tmp (mktemp -t "yazi-cwd.XXXXX")
     yazi $argv --cwd-file="$tmp"
-    if set -l cwd (command cat -- "$tmp"); and test -n "$cwd"; and test "$cwd" != "$PWD"
+    if set -l cwd (command cat "$tmp"); and test -n "$cwd"; and test "$cwd" != "$PWD"
         builtin cd -- "$cwd"
     end
-    command rm -f -- "$tmp"
+    command rm -f "$tmp"
 end
