@@ -46,9 +46,10 @@ plugins elsewhere.
 
 ## Key bindings
 
-The prefix is `Ctrl-a`. After the prefix, `|` splits horizontally and `-` splits
-vertically; `h`, `j`, `k`, and `l` navigate panes, while `H`, `J`, `K`, and `L`
-resize the active pane. `r` reloads the linked `tmux.conf`.
+The prefix is `Ctrl-a`. After the prefix, `-` splits vertically (stacked) and
+`v` (or `Shift+-`) splits horizontally (side by side); `h`, `j`, `k`, and `l`
+navigate panes, while `H`, `J`, `K`, and `L` resize the active pane. `r` reloads
+the linked `tmux.conf`.
 
 ## Pane Zoom and Historical Maximize Behavior
 
