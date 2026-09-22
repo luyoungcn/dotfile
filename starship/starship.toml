@@ -10,7 +10,7 @@
 
 add_newline = true
 command_timeout = 1000
-scan_timeout = 50
+scan_timeout = 500
 palette = 'one_dark'
 
 # First line: location and repository state on the left, transient context on
