@@ -254,6 +254,7 @@ fi
 # SDK 便捷别名/快捷函数定义
 # -----------------------------------------------------------------------------
 alias bst_sdk_25.2.0='denter c1200_evkit_docker_sdk-v25.2.0 /workspace/host_folder'
+alias bst_sdk_26.2.0='denter a2000_evkit_sdk_docker-v26.2.0-release /workspace/host_folder'
 alias bst_sdk_2.3.0.4='denter a1000b-sdk-fad-2.3.0.4 /home'
 alias hanhai-sdk-2000='denter hanhai-sdk-manager-a2000-25 /home/share_mount'
 alias eza='eza --git --group-directories-first --icons=auto'
