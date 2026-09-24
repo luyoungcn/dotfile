@@ -1,11 +1,7 @@
-# The zsh home entry point is managed by install.sh; keep any unrelated local
-# copy out of the repository if one is created at the repository root.
-/.zshrc
-
 # Local secrets and editor/OS artifacts.
 secrets.*
 *.secret
-# Machine-specific overrides (e.g. ~/.zshenv.local) are never committed.
+# Machine-specific overrides (e.g. ~/.config/fish/fish.local) are never committed.
 *.local
 .DS_Store
 *~

@@ -1,8 +1,7 @@
 # Starship 提示符
 
-这份配置把现有的 Powerlevel10k 视觉语言迁移到了 Starship：One Dark
-配色、Nerd Font 图标、Powerline 语义和双行布局保持不变，但将提示符拆成
-更容易维护的模块。
+这份配置采用 One Dark 配色、Nerd Font 图标、Powerline 语义和双行布局，
+把提示符拆成更容易维护的模块（视觉语言沿自早期的 Powerlevel10k 主题）。
 
 ## 设计决策
 
@@ -32,15 +31,15 @@
    ./install.sh
    ```
 
-3. 重新载入 zsh：
+3. 重新载入 fish：
 
    ```sh
-   exec zsh
+   exec fish
    ```
 
-`zsh/zshrc` 会在检测到 `starship` 时关闭 P10k 主题并初始化 Starship；如果
-Starship 暂时不可用，则继续使用原来的 P10k 配置，避免远程或救援环境无法
-使用 shell。
+`fish/config.fish` 会在检测到 `starship` 时初始化 Starship；如果 Starship
+暂时不可用，则继续使用 Fish 的默认提示符，避免远程或救援环境无法使用
+shell。
 
 ## 校验与调试
 
@@ -53,7 +52,7 @@ STARSHIP_LOG=error starship module directory
 STARSHIP_LOG=error starship module git_status
 
 # 仅在需要时临时切换配置
-STARSHIP_CONFIG=/path/to/another/starship.toml exec zsh
+STARSHIP_CONFIG=/path/to/another/starship.toml exec fish
 ```
 
 若 Nerd Font 图标显示为方框，请确认终端正在使用 FiraCode Nerd Font Mono

@@ -26,16 +26,50 @@ if test -r /proc/version; and grep -qi microsoft /proc/version
     end
 end
 
+# 通用 Docker 容器进入工具（迁移自 zsh/zshrc 的 denter）。
+# 用法：denter <容器名> [工作目录=/workspace] [用户=root] [shell=/bin/bash]
+function denter --description '启动并进入 Docker 容器'
+    set -l container_name "$argv[1]"
+    if test -z "$container_name"
+        echo "Error: Container name is required." >&2
+        return 1
+    end
+
+    set -l work_dir /workspace
+    set -l user root
+    set -l shell_bin /bin/bash
+    set -q argv[2]; and set work_dir "$argv[2]"
+    set -q argv[3]; and set user "$argv[3]"
+    set -q argv[4]; and set shell_bin "$argv[4]"
+
+    docker ps -a --format '{{.Names}}' | string match -q "$container_name"
+    or begin
+        echo "Error: Container '$container_name' does not exist." >&2
+        return 1
+    end
+
+    if test (docker inspect -f '{{.State.Running}}' "$container_name" 2>/dev/null) != true
+        echo "Starting container '$container_name'..."
+        docker start "$container_name" >/dev/null; or return 1
+    end
+
+    echo "Entering '$container_name' as '$user' at '$work_dir'..."
+    docker exec -it -u "$user" -w "$work_dir" "$container_name" "$shell_bin"
+end
+
+complete -c denter -f -a '(docker ps -a --format "{{.Names}}")'
+
+# SDK 快捷入口：薄封装 denter（迁移自 zsh/zshrc 的别名）。
 function bst_sdk_25.2.0
-    docker start c1200_evkit_docker_sdk-v25.2.0; and docker exec -it -u root -w /workspace/host_folder c1200_evkit_docker_sdk-v25.2.0 bash
+    denter c1200_evkit_docker_sdk-v25.2.0 /workspace/host_folder
 end
 
 function bst_sdk_2.3.0.4
-    docker start a1000b-sdk-fad-2.3.0.4; and docker exec -it -u root -w /home a1000b-sdk-fad-2.3.0.4 bash
+    denter a1000b-sdk-fad-2.3.0.4 /home
 end
 
-function hanhai-sdk-manager-a20000-25
-    docker start hanhai-sdk-manager-a2000-25; and docker exec -it -u root -w /home/share_mount hanhai-sdk-manager-a2000-25 /bin/bash
+function hanhai-sdk-2000
+    denter hanhai-sdk-manager-a2000-25 /home/share_mount
 end
 
 function y

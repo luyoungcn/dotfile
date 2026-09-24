@@ -1,8 +1,8 @@
-# Fish, Fisher, and Tide
+# Fish, Fisher, and Starship
 
-Fish is an optional interactive shell in this dotfiles repository. The login
-shell remains bash/zsh, and scripts continue to use their shebang (for example,
-`#!/usr/bin/env bash`). Fish configuration is loaded only when Fish is used.
+Fish is the interactive shell in this dotfiles repository, with Starship as the
+prompt. Scripts keep their own shebang (for example, `#!/usr/bin/env bash`),
+and no configuration here calls `chsh`; switching the login shell is optional.
 
 ## Installation
 
@@ -13,17 +13,17 @@ sudo apt update
 sudo apt install -y fish fzf curl git
 ```
 
-Fish is installed on the reference system as version 4.2.1. Install Fisher in a
-Fish process with:
+Fish 4.x is expected. Install Fisher in a Fish process with:
 
 ```sh
 fish -c 'curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source; and fisher install jorgebucaran/fisher'
 ```
 
-The repository manifest installs Tide v6 and the selected plugins:
+The repository manifest installs the selected plugins (no prompt plugin — the
+prompt is handled by Starship, not a Fisher plugin):
 
 ```sh
-fish -c 'fisher install IlanCosman/tide@v6 jethrokuan/z patrickf1/fzf.fish franciscolourenco/done edc/bass jorgebucaran/nvm.fish'
+fish -c 'fisher install jethrokuan/z patrickf1/fzf.fish franciscolourenco/done edc/bass jorgebucaran/nvm.fish'
 ```
 
 `gazorby/fish-autopair` was not included because Fisher currently reports that
@@ -38,34 +38,43 @@ manifest whenever it changes:
 fish -c 'fisher update'
 ```
 
-The installer links `config.fish`, files under `conf.d/`, the custom Tide item,
-and `fish_plugins` individually. It does not replace Fisher-generated
-functions/completions, plugin `conf.d` files, or `fish_variables`.
+The installer links `config.fish`, files under `conf.d/`, and `fish_plugins`
+individually. It does not replace Fisher-generated functions/completions,
+plugin `conf.d` files, or `fish_variables`.
 
 ## Layout
 
-- `config.fish`: small entry point; no prompt initialization is needed because
-  Tide owns the prompt after Fisher installs it.
+- `config.fish`: entry point; initializes Starship for interactive shells.
 - `conf.d/00_env.fish`: Fish-only paths, WSL gateway detection, and `NVM_DIR`.
 - `conf.d/05_rustup.fish`: loads Cargo's Fish environment when present.
-- `conf.d/10_aliases.fish`: interactive aliases.
-- `conf.d/20_functions.fish`: proxy, Docker SDK, and yazi helpers.
-- `conf.d/30_tide.fish`: universal Catppuccin Frappé Tide variables.
-- `functions/_tide_item_nvm.fish`: custom Tide item for the active
-  `nvm.fish` version.
-- `fish_plugins`: Fisher manifest, including Tide v6, z, fzf.fish, done, bass,
-  and nvm.fish.
+- `conf.d/10_aliases.fish`: interactive aliases (`lg`, `eza`).
+- `conf.d/15_ai_env.fish`: Claude Code / DeepSeek non-sensitive environment.
+- `conf.d/19_local.fish`: sources `~/.config/fish/fish.local` when present
+  (the Fish equivalent of the old `~/.zshenv.local`; never committed).
+- `conf.d/20_functions.fish`: WSL proxy helpers, `denter`, `bst_sdk_*` SDK
+  shortcuts, and the yazi `y` helper.
+- `fish_plugins`: Fisher manifest (z, fzf.fish, done, bass, nvm.fish).
 
-## Tide theme
+## Prompt
 
-The prompt uses the Catppuccin Frappé colors already used by
-`tmux/colors.conf`. The left prompt is `pwd git newline character`; the right
-prompt is `status cmd_duration jobs nvm python time`. Tide v6 calls the
-background-job item `jobs` and the Python virtual-environment item `python`.
-The repository adds the missing `nvm` item locally.
+Starship owns the prompt; `config.fish` runs `starship init fish` when the
+binary is available. The theme is defined in `starship/starship.toml` (One
+Dark, two-line). If Starship is missing, Fish falls back to its default prompt.
 
-All Tide settings are written as universal variables in `conf.d/30_tide.fish`,
-so a new Fish process receives the same theme without changing the login shell.
+## Docker SDK helpers
+
+`denter` is the generic entry point: it starts a stopped container, then enters
+it with a chosen work directory, user, and shell. The SDK shortcuts are thin
+wrappers:
+
+```fish
+bst_sdk_25.2.0   # denter c1200_evkit_docker_sdk-v25.2.0 /workspace/host_folder
+bst_sdk_2.3.0.4  # denter a1000b-sdk-fad-2.3.0.4 /home
+hanhai-sdk-2000  # denter hanhai-sdk-manager-a2000-25 /home/share_mount
+```
+
+Container names complete with Tab via the `complete` line in
+`conf.d/20_functions.fish`.
 
 ## Existing Fish configuration
 
@@ -74,20 +83,17 @@ files and `fish_variables` in place. `./install.sh` backs up an existing
 `config.fish` or managed module before linking the repository version; review
 the timestamped backup if local settings were not already migrated. Add future
 customizations as new `conf.d/` modules rather than editing generated plugin
-files.
+files. Machine-specific secrets go in `~/.config/fish/fish.local` (sourced by
+`conf.d/19_local.fish`), which is never committed.
 
 ## Verification
 
 ```sh
 fish --version
 fish -c 'type -q fisher; and fisher --version'
-fish -c 'tide --version'
 fish -c 'fisher list'
-fish -c 'string join " " $tide_left_prompt_items'
-fish -c 'string join " " $tide_right_prompt_items'
-fish -c 'type -q _tide_item_nvm'
+starship --version
+fish -n "$HOME/.config/fish/config.fish"
 ```
 
-Start an interactive Fish shell with `fish` to inspect the prompt. `nvm use
-<version>` makes the custom nvm segment visible; activating a Python virtual
-environment makes the Tide `python` segment visible.
+Start an interactive Fish shell with `fish` to inspect the Starship prompt.
