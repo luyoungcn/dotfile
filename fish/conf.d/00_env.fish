@@ -3,6 +3,13 @@ status is-interactive; or return
 
 fish_add_path --global "$HOME/.local/bin" "$HOME/.cargo/bin"
 
+# Homebrew on Apple Silicon does not add itself to Fish's PATH.
+test -d /opt/homebrew/bin; and fish_add_path --append --global /opt/homebrew/bin /opt/homebrew/sbin
+
+# Pi's launcher uses its standalone Node.js runtime.
+set -l pi_node_bin "$HOME/.local/share/pi-node/current/bin"
+test -d "$pi_node_bin"; and fish_add_path --global "$pi_node_bin"
+
 # snap is Ubuntu-specific; only add the directory when it actually exists.
 if test -d /snap/bin
     fish_add_path --global /snap/bin
