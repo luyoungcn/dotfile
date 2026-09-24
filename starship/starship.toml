@@ -1,7 +1,7 @@
 # Starship prompt for this dotfiles repository.
 #
 # Design goals:
-# - One Dark colours shared with Xresources and the terminal palette.
+# - One Dark colours defined in the local palette below.
 # - A quiet, two-line prompt: context and repository state above, input below.
 # - Useful information at a glance without making every shell prompt noisy.
 # - Nerd Font symbols are used consistently with tmux and the One Dark palette.

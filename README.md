@@ -1,9 +1,7 @@
 # dotfiles
 
 Personal Linux/WSL development-environment configuration for Neovim, tmux,
-Fish (with Starship), and i3-related desktop tools.
-
-![最终配置展示](assets/showcase.png)
+and Fish (with Starship).
 
 ## Architecture
 
@@ -19,11 +17,6 @@ chezmoi, and it does not change the login shell.
 | Fish | `fish/config.fish`, `fish/conf.d/` | `${XDG_CONFIG_HOME:-~/.config}/fish/` | Yes, per-file links |
 | Fisher manifest | `fish/fish_plugins` | `${XDG_CONFIG_HOME:-~/.config}/fish/fish_plugins` | Yes |
 | Starship | `starship/starship.toml` | `${XDG_CONFIG_HOME:-~/.config}/starship.toml` | Yes |
-
-The legacy desktop/system files (`i3/`, `rofi/`, `Xresources`, `gtkrc-2.0`,
-`onedark.theme`, `dnscrypt-proxy.toml`, and `unbound.conf`) remain in the
-repository but are not linked by the current installer. Deploy those files
-manually when needed for a specific machine.
 
 ## Shell model
 

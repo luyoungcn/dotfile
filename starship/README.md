@@ -7,7 +7,7 @@
 
 | 目标 | 实现 |
 | --- | --- |
-| 保持个人主题 | 颜色取自 `Xresources` 的 Atom One Dark 调色板，并集中定义为 `one_dark` palette |
+| 保持个人主题 | One Dark 调色板集中定义为 `one_dark` palette（在 `starship.toml` 的 `[palettes.one_dark]`） |
 | 维持双行、留白和简洁感 | 第一行显示目录/Git/状态与运行时信息，第二行只放输入符号 |
 | 快速判断仓库状态 | 分支、未跟踪、修改、暂存、冲突、领先/落后数量直接显示 |
 | 减少噪声 | 语言版本只在对应项目中出现；命令耗时只显示超过 2 秒的命令 |
@@ -55,8 +55,8 @@ STARSHIP_LOG=error starship module git_status
 STARSHIP_CONFIG=/path/to/another/starship.toml exec fish
 ```
 
-若 Nerd Font 图标显示为方框，请确认终端正在使用 FiraCode Nerd Font Mono
-（仓库的 `Xresources` 已采用该字体），并重启终端使字体设置生效。
+若 Nerd Font 图标显示为方框，请确认终端正在使用 FiraCode Nerd Font Mono，
+并重启终端使字体设置生效。
 
 ## 后续微调
 
