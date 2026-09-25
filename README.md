@@ -30,7 +30,8 @@ own shebang (`#!/usr/bin/env bash`); no configuration in this repository calls
 
 The installer assumes `sh`, `git`, and a writable home directory. It installs
 TPM but does not install system packages, Neovim, tmux, Fish, Nerd Fonts,
-Starship, or command-line tools.
+Starship, or command-line tools. To install the toolchain automatically on a
+fresh machine, use `./bootstrap.sh` (see [Bootstrap](#bootstrap-one-shot-setup)).
 
 On Ubuntu/WSL, install a practical baseline with:
 
@@ -48,7 +49,9 @@ Install shell-specific managers and themes as described in:
 
 ## Deployment
 
-Clone the repository and run the installer:
+For a full one-shot setup (packages + managers + dotfiles), use
+`./bootstrap.sh` instead — see [Bootstrap](#bootstrap-one-shot-setup) below.
+To deploy only the dotfiles, clone the repository and run the installer:
 
 ```sh
 git clone <your-repository-url> ~/Document/dotfile
@@ -73,6 +76,32 @@ Fisher, synchronize the repository manifest with:
 ```sh
 fish -c 'fisher update'
 ```
+
+## Bootstrap (one-shot setup)
+
+`bootstrap.sh` is the "new machine" entry point. It runs every numbered step
+in `setup/` in order and stops on the first failure. Each step is idempotent,
+so re-running the whole script is safe.
+
+```sh
+./bootstrap.sh
+```
+
+Steps live in `setup/`:
+
+| Step | Responsibility |
+| --- | --- |
+| `00_system.sh` | Base packages (fish, git, curl, tmux, fzf, ripgrep, fd, jq, ...) |
+| `10_neovim.sh` | Install latest Neovim from the official GitHub release |
+| `15_cli_tools.sh` | Install eza, lazygit, and yazi (used by fish aliases) |
+| `20_deploy.sh` | Symlink dotfiles and install TPM (runs `install.sh`) |
+| `30_fisher.sh` | Install Fisher and sync `fish_plugins` |
+| `40_node.sh` | Install Node.js LTS and set `nvm_default_version` |
+| `50_starship.sh` | Install the Starship binary |
+
+Adding a tool is just a new numbered file in `setup/`; `bootstrap.sh` discovers
+and runs it automatically. Numbering encodes order: steps numbered below `20`
+run before deployment, `20` deploys, and steps above `20` run after.
 
 ## Component summary
 
@@ -111,6 +140,7 @@ After deployment, verify links and shell configuration:
 ```sh
 git status --short
 sh -n install.sh
+sh -n bootstrap.sh
 tmux -V
 fish --version
 fish -c 'fisher list'
@@ -126,7 +156,7 @@ Edit repository files, rerun `./install.sh` when links need refreshing, and
 commit only the component being changed:
 
 ```sh
-git add nvim tmux fish starship README.md install.sh
+git add nvim tmux fish starship README.md install.sh bootstrap.sh setup
 git commit
 ```
 

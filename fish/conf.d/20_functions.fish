@@ -1,30 +1,53 @@
 status is-interactive; or return
 
-# WSL 代理开关：仅在 WSL 环境下定义，避免在其他平台产生无效命令。
-if test -r /proc/version; and grep -qi microsoft /proc/version
-    function proxy_on
-        if not set -q host_ip
-            set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
-            if test -z "$gateway"
-                echo "Unable to determine the WSL host gateway." >&2
-                return 1
-            end
-            set -gx host_ip $gateway
+# 代理开关：跨平台可用。
+#   - WSL：host 指向 Windows 主机网关（通过 ip route 获取）。
+#   - macOS/Linux：host 指向本机 127.0.0.1。
+# 端口默认 7897，可通过 PROXY_PORT 变量覆盖。
+function __proxy_resolve_host
+    if test -r /proc/version; and grep -qi microsoft /proc/version
+        set -l gateway (ip route 2>/dev/null | awk '/default/ {print $3; exit}')
+        if test -z "$gateway"
+            echo "Unable to determine the WSL host gateway." >&2
+            return 1
         end
-
-        set -gx http_proxy "http://$host_ip:7897"
-        set -gx https_proxy "http://$host_ip:7897"
-        set -gx all_proxy "socks5://$host_ip:7897"
-        echo "Proxy environment variables set pointing to Windows host ($host_ip:7897)."
-    end
-
-    function proxy_off
-        set -e http_proxy
-        set -e https_proxy
-        set -e all_proxy
-        echo "Proxy environment variables removed."
+        echo $gateway
+    else
+        echo 127.0.0.1
     end
 end
+
+function proxy_on
+    if not set -q host_ip
+        set -l resolved (__proxy_resolve_host); or return 1
+        set -gx host_ip $resolved
+    end
+
+    set -l proxy_port 7897
+    set -q PROXY_PORT; and set proxy_port $PROXY_PORT
+
+    set -gx http_proxy "http://$host_ip:$proxy_port"
+    set -gx https_proxy "http://$host_ip:$proxy_port"
+    set -gx all_proxy "socks5://$host_ip:$proxy_port"
+    set -gx HTTP_PROXY "http://$host_ip:$proxy_port"
+    set -gx HTTPS_PROXY "http://$host_ip:$proxy_port"
+    set -gx ALL_PROXY "socks5://$host_ip:$proxy_port"
+    echo "Proxy enabled -> $host_ip:$proxy_port"
+end
+
+function proxy_off
+    set -e http_proxy
+    set -e https_proxy
+    set -e all_proxy
+    set -e HTTP_PROXY
+    set -e HTTPS_PROXY
+    set -e ALL_PROXY
+    echo "Proxy disabled."
+end
+
+# 兼容旧 zsh 时代的命令名 proxy/unproxy
+alias proxy proxy_on
+alias unproxy proxy_off
 
 # 通用 Docker 容器进入工具（迁移自 zsh/zshrc 的 denter）。
 # 用法：denter <容器名> [工作目录=/workspace] [用户=root] [shell=/bin/bash]

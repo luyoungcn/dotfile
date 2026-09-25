@@ -45,7 +45,7 @@ plugin `conf.d` files, or `fish_variables`.
 ## Layout
 
 - `config.fish`: entry point; initializes Starship for interactive shells.
-- `conf.d/00_env.fish`: Fish-only paths, WSL gateway detection, and `NVM_DIR`.
+- `conf.d/00_env.fish`: Fish-only paths and WSL gateway detection.
 - `conf.d/05_rustup.fish`: loads Cargo's Fish environment when present.
 - `conf.d/10_aliases.fish`: interactive aliases (`lg`, `eza`).
 - `conf.d/15_ai_env.fish`: Claude Code / DeepSeek non-sensitive environment.
@@ -60,6 +60,42 @@ plugin `conf.d` files, or `fish_variables`.
 Starship owns the prompt; `config.fish` runs `starship init fish` when the
 binary is available. The theme is defined in `starship/starship.toml` (One
 Dark, two-line). If Starship is missing, Fish falls back to its default prompt.
+
+## nvm (Node.js version manager)
+
+`nvm.fish` is a Fish-native nvm wrapper listed in `fish_plugins`. It stores
+Node versions in `nvm_data` (`~/.local/share/nvm` by default), so no `NVM_DIR`
+is needed. Install Fisher and synchronize the manifest first:
+
+```sh
+fish -c 'fisher update'
+```
+
+Install a Node version and set it as the global default:
+
+```fish
+# Install the latest LTS version
+nvm install lts
+
+# Set the global default Node version
+set -U nvm_default_version lts
+```
+
+Verify that Fish picks up `node` and `npm`:
+
+```fish
+node -v
+npm -v
+```
+
+Common commands:
+
+| Operation | Command |
+| --- | --- |
+| Install a specific version | `nvm install 20` |
+| Switch the current version | `nvm use 20` |
+| List installed versions | `nvm ls` |
+| Switch to the latest LTS | `nvm use lts` |
 
 ## Docker SDK helpers
 

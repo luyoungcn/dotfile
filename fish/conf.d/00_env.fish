@@ -15,7 +15,8 @@ if test -d /snap/bin
     fish_add_path --global /snap/bin
 end
 
-set -gx NVM_DIR "$HOME/.nvm"
+# nvm.fish (the Fisher plugin) manages Node and stores versions in
+# nvm_data (~/.local/share/nvm by default), so no NVM_DIR is needed here.
 
 # Resolve the WSL host gateway lazily for the proxy helpers.
 # /proc/version only exists on Linux; the "microsoft" marker identifies WSL.
