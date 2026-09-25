@@ -92,6 +92,7 @@ Steps live in `setup/`:
 | Step | Responsibility |
 | --- | --- |
 | `00_system.sh` | Base packages (fish, git, curl, tmux, fzf, ripgrep, fd, jq, ...) |
+| `05_docker.sh` | Docker Engine + CLI + Compose (adds user to the docker group) |
 | `10_neovim.sh` | Install latest Neovim from the official GitHub release |
 | `15_cli_tools.sh` | Install eza, lazygit, and yazi (used by fish aliases) |
 | `20_deploy.sh` | Symlink dotfiles and install TPM (runs `install.sh`) |

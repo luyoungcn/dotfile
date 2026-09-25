@@ -40,6 +40,17 @@ as_root() {
     fi
 }
 
+# Locate the Homebrew executable, even if it is not yet on this shell's PATH.
+find_brew() {
+    if have brew; then
+        command -v brew
+        return
+    fi
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        [ -x "$candidate" ] && echo "$candidate" && return
+    done
+}
+
 # Install a list of packages using the platform package manager.
 install_pkgs() {
     case "$(os_name)" in
@@ -48,21 +59,11 @@ install_pkgs() {
             as_root apt-get install -y "$@"
             ;;
         macos)
-            brew_bin=""
-            if have brew; then
-                brew_bin="$(command -v brew)"
-            else
-                # Homebrew may be installed but not yet on this shell's PATH.
-                for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-                    [ -x "$candidate" ] && brew_bin="$candidate" && break
-                done
-            fi
+            brew_bin=$(find_brew)
             if [ -z "$brew_bin" ]; then
                 info "Installing Homebrew"
                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-                for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-                    [ -x "$candidate" ] && brew_bin="$candidate" && break
-                done
+                brew_bin=$(find_brew)
             fi
             [ -n "$brew_bin" ] || die "Homebrew did not install correctly"
             "$brew_bin" install "$@"
