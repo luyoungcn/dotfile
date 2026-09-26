@@ -104,6 +104,8 @@ Adding a tool is just a new numbered file in `setup/`; `bootstrap.sh` discovers
 and runs it automatically. Numbering encodes order: steps numbered below `20`
 run before deployment, `20` deploys, and steps above `20` run after.
 
+Planned-but-not-yet-needed steps are tracked in [TODO.md](TODO.md).
+
 ### Troubleshooting
 
 - **`apt-get update` fails on a new Ubuntu release** (for example, a stale
