@@ -44,6 +44,13 @@ The installer links both configuration files into
 `TMUX_PLUGIN_MANAGER_PATH` before running `./install.sh` to place TPM and its
 plugins elsewhere.
 
+To remove the session state saved by `tmux-resurrect`, delete its latest
+snapshot:
+
+```bash
+rm -f ~/.tmux/resurrect/last
+```
+
 ## Key bindings
 
 The prefix is `Ctrl-a`. After the prefix, `-` splits vertically (stacked) and
