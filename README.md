@@ -104,6 +104,26 @@ Adding a tool is just a new numbered file in `setup/`; `bootstrap.sh` discovers
 and runs it automatically. Numbering encodes order: steps numbered below `20`
 run before deployment, `20` deploys, and steps above `20` run after.
 
+### Troubleshooting
+
+- **`apt-get update` fails on a new Ubuntu release** (for example, a stale
+  `fish-shell` PPA returns 404 or an old `docker.list` errors out): remove the
+  stale third-party sources, then re-run. Ubuntu ships Fish in its default
+  repositories, so the Fish PPA is unnecessary:
+
+  ```sh
+  ls /etc/apt/sources.list.d/
+  sudo rm -f /etc/apt/sources.list.d/*fish* /etc/apt/sources.list.d/docker.list
+  sudo apt-get update
+  ```
+
+- **Docker downloads reset/blocked in China**: `download.docker.com` is often
+  unreachable. Use a mirror (USTC/Aliyun/Tencent) for the Docker apt step:
+
+  ```sh
+  DOCKER_APT_MIRROR=https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu ./bootstrap.sh
+  ```
+
 ## Component summary
 
 ### Neovim

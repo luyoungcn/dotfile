@@ -6,11 +6,16 @@
 # auditable, and reproducible. Non-Ubuntu Linux falls back to get.docker.com.
 # macOS: reuse an existing Docker Desktop/OrbStack install; otherwise install
 # colima + Docker CLI + Compose via Homebrew.
+#
+# In China, download.docker.com is often unreachable; override the repo base:
+#   DOCKER_APT_MIRROR=https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu ./bootstrap.sh
 set -eu
 
 . "$(CDPATH= cd "$(dirname "$0")" && pwd)/lib.sh"
 
 have curl || die "curl is required (run 00_system.sh first)"
+
+docker_apt_base=${DOCKER_APT_MIRROR:-https://download.docker.com/linux/ubuntu}
 
 install_docker_ubuntu() {
     info "Removing conflicting packages"
@@ -24,7 +29,7 @@ install_docker_ubuntu() {
     as_root install -m 0755 -d /etc/apt/keyrings
 
     key=$(mktemp)
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o "$key" || die "Failed to download Docker GPG key"
+    curl -fsSL "$docker_apt_base/gpg" -o "$key" || die "Failed to download Docker GPG key"
     gpg --dearmor -o "$key.gpg" < "$key" || die "Failed to dearmor Docker GPG key"
     as_root install -m 0644 "$key.gpg" /etc/apt/keyrings/docker.gpg
     rm -f "$key" "$key.gpg"
@@ -32,7 +37,7 @@ install_docker_ubuntu() {
     info "Adding Docker's official apt repository"
     arch=$(dpkg --print-architecture)
     codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
-    printf '%s\n' "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $codename stable" |
+    printf '%s\n' "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.gpg] $docker_apt_base $codename stable" |
         as_root tee /etc/apt/sources.list.d/docker.list >/dev/null
 
     info "Installing Docker Engine + CLI + Compose plugin"
