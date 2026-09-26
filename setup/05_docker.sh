@@ -7,7 +7,9 @@
 # macOS: reuse an existing Docker Desktop/OrbStack install; otherwise install
 # colima + Docker CLI + Compose via Homebrew.
 #
-# In China, download.docker.com is often unreachable; override the repo base:
+# In China, download.docker.com is often unreachable. The step auto-falls
+# back to the USTC mirror when the official host is unreachable; set
+# DOCKER_APT_MIRROR to force a specific base:
 #   DOCKER_APT_MIRROR=https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu ./bootstrap.sh
 set -eu
 
@@ -16,6 +18,11 @@ set -eu
 have curl || die "curl is required (run 00_system.sh first)"
 
 docker_apt_base=${DOCKER_APT_MIRROR:-https://download.docker.com/linux/ubuntu}
+# Only auto-fallback when no explicit mirror was configured.
+docker_apt_fallback=""
+if [ -z "${DOCKER_APT_MIRROR:-}" ]; then
+    docker_apt_fallback="https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu"
+fi
 
 install_docker_ubuntu() {
     info "Removing conflicting packages"
@@ -29,7 +36,16 @@ install_docker_ubuntu() {
     as_root install -m 0755 -d /etc/apt/keyrings
 
     key=$(mktemp)
-    curl -fsSL "$docker_apt_base/gpg" -o "$key" || die "Failed to download Docker GPG key"
+    if curl -fsSL --connect-timeout 5 --max-time 15 "$docker_apt_base/gpg" -o "$key"; then
+        :
+    elif [ -n "$docker_apt_fallback" ]; then
+        info "$docker_apt_base unreachable; falling back to $docker_apt_fallback"
+        docker_apt_base=$docker_apt_fallback
+        curl -fsSL --connect-timeout 5 --max-time 15 "$docker_apt_base/gpg" -o "$key" ||
+            die "Failed to download Docker GPG key from $docker_apt_base"
+    else
+        die "Failed to download Docker GPG key from $docker_apt_base"
+    fi
     gpg --dearmor -o "$key.gpg" < "$key" || die "Failed to dearmor Docker GPG key"
     as_root install -m 0644 "$key.gpg" /etc/apt/keyrings/docker.gpg
     rm -f "$key" "$key.gpg"
