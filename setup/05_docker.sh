@@ -11,6 +11,10 @@
 # back to the USTC mirror when the official host is unreachable; set
 # DOCKER_APT_MIRROR to force a specific base:
 #   DOCKER_APT_MIRROR=https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu ./bootstrap.sh
+#
+# Docker image pulls (registry.docker.io) are handled separately: the step
+# auto-falls back to a working public registry mirror, or uses
+# DOCKER_REGISTRY_MIRRORS (comma/space separated) when set.
 set -eu
 
 . "$(CDPATH= cd "$(dirname "$0")" && pwd)/lib.sh"
@@ -69,6 +73,73 @@ install_docker_getdocker() {
     rm -f "$tmp"
 }
 
+# A registry answers /v2/ with 401 (auth required) or 200 when reachable.
+registry_reachable() {
+    code=$(curl -sL -o /dev/null -w '%{http_code}' --connect-timeout 4 --max-time 8 "$1/v2/")
+    [ "$code" = "401" ] || [ "$code" = "200" ]
+}
+
+# Merge registry mirrors into /etc/docker/daemon.json without clobbering it.
+write_registry_mirrors() {
+    have jq || die "jq is required (run 00_system.sh first)"
+
+    mirrors_json=$(printf '%s\n' "$@" | jq -Rn '[inputs]')
+
+    as_root install -m 0755 -d /etc/docker
+    if [ -f /etc/docker/daemon.json ]; then
+        merged=$(jq --argjson m "$mirrors_json" '. + {"registry-mirrors": $m}' /etc/docker/daemon.json) ||
+            die "Invalid existing /etc/docker/daemon.json"
+    else
+        merged=$(printf '%s' "$mirrors_json" | jq '{ "registry-mirrors": . }')
+    fi
+    printf '%s\n' "$merged" | as_root tee /etc/docker/daemon.json >/dev/null
+    info "Wrote registry mirrors to /etc/docker/daemon.json"
+}
+
+restart_docker() {
+    if as_root systemctl restart docker 2>/dev/null; then
+        info "Restarted Docker daemon"
+    elif as_root service docker restart 2>/dev/null; then
+        info "Restarted Docker daemon"
+    else
+        info "Restart Docker manually to apply registry mirrors"
+    fi
+}
+
+configure_registry_mirrors() {
+    mirrors=${DOCKER_REGISTRY_MIRRORS:-}
+
+    # Auto-detect only when no mirror was explicitly configured.
+    if [ -z "$mirrors" ] && ! registry_reachable "https://registry.docker.io"; then
+        # Best-effort public mirrors. Kept short and overridable because these
+        # endpoints change often in China.
+        for candidate in \
+            https://docker.m.daocloud.io \
+            https://docker.1ms.run \
+            https://dockerproxy.net \
+            https://hub.rat.dev
+        do
+            if registry_reachable "$candidate"; then
+                mirrors=$candidate
+                break
+            fi
+        done
+    fi
+
+    if [ -z "$mirrors" ]; then
+        if ! registry_reachable "https://registry.docker.io"; then
+            info "Docker Hub is unreachable and no working public mirror was found."
+            info "For China, get a free Aliyun accelerator URL, then re-run with:"
+            info "  DOCKER_REGISTRY_MIRRORS=https://<your-id>.mirror.aliyuncs.com ./bootstrap.sh"
+        fi
+        return 0
+    fi
+
+    # Accept comma- or space-separated mirrors.
+    write_registry_mirrors $(printf '%s' "$mirrors" | tr ',' ' ')
+    restart_docker
+}
+
 case "$(os_name)" in
     linux)
         if have docker; then
@@ -80,6 +151,8 @@ case "$(os_name)" in
                 install_docker_getdocker
             fi
         fi
+
+        configure_registry_mirrors
 
         # Non-root access via the docker group (applies after re-login).
         if id -Gn 2>/dev/null | tr ' ' '\n' | grep -qx docker; then

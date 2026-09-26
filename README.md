@@ -117,14 +117,17 @@ run before deployment, `20` deploys, and steps above `20` run after.
   sudo apt-get update
   ```
 
-- **China networks** (`download.docker.com` / `nodejs.org` unreachable): the
-  Docker and Node steps probe the official hosts and fall back to
-  USTC / npmmirror automatically, so plain `./bootstrap.sh` works. To force a
-  specific mirror instead:
+- **China networks** (`download.docker.com` / `nodejs.org` / Docker Hub
+  unreachable): the Docker and Node steps probe the official hosts and fall
+  back to USTC / npmmirror automatically, and Docker image pulls fall back to
+  a working public registry mirror, so plain `./bootstrap.sh` works. Public
+  registry mirrors change often; for a reliable one, use a free Aliyun
+  accelerator and force it (or any mirror) with:
 
   ```sh
   DOCKER_APT_MIRROR=https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu \
   NVM_MIRROR=https://npmmirror.com/mirrors/node \
+  DOCKER_REGISTRY_MIRRORS=https://<your-id>.mirror.aliyuncs.com \
   ./bootstrap.sh
   ```
 
