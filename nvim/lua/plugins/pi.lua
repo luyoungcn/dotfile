@@ -1,7 +1,7 @@
--- pi (AI coding agent) integration — Plan A: floating terminal.
+-- pi (AI coding agent) integration — Plan A: bottom split terminal.
 --
--- Runs the interactive `pi` TUI inside a snacks.nvim float and reuses the
--- same <leader>a* prefix that claudecode.nvim provided. No deep
+-- Runs the interactive `pi` TUI inside a snacks.nvim bottom split and reuses
+-- the same <leader>a* prefix that claudecode.nvim provided. No deep
 -- buffer/selection or diff integration yet; pi's RPC/SDK can power that
 -- later if needed.
 
@@ -12,18 +12,12 @@ local function pi_bin()
   return p ~= "" and p or "pi"
 end
 
----Window options for the pi terminal float.
+---Window options for the pi terminal split (bottom of the editor).
 local function pi_term()
   return {
     win = {
-      position = "float",
-      relative = "editor",
-      width = 0.82,
-      height = 0.85,
-      border = "rounded",
-      backdrop = 60,
-      title = " pi ",
-      title_pos = "center",
+      position = "bottom",
+      height = 0.4,
       keys = {
         pi_hide = { "<C-\\><C-n>", "hide", mode = "t", desc = "Hide pi" },
       },
