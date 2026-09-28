@@ -5,32 +5,21 @@ return {
     local auto = require("lualine.themes.auto")
 
     local colors = {
-      rosewater = "#f2d5cf",
-      flamingo = "#eebebe",
-      pink = "#f4b8e4",
-      mauve = "#ca9ee6",
-      red = "#e78284",
-      maroon = "#ea999c",
-      peach = "#ef9f76",
-      yellow = "#e5c890",
-      green = "#a6d189",
-      teal = "#81c8be",
-      sky = "#99d1db",
-      sapphire = "#85c1dc",
-      blue = "#8caaee",
-      lavender = "#babbf1",
-      text = "#c6d0f5",
-      subtext1 = "#b5bfe2",
-      subtext0 = "#a5adce",
-      overlay2 = "#949cbb",
-      overlay1 = "#838ba7",
-      overlay0 = "#737994",
-      surface2 = "#626880",
-      surface1 = "#51576d",
-      surface0 = "#414559",
-      base = "#303446",
-      mantle = "#292c3c",
-      crust = "#232634",
+      -- Solarized dark palette
+      base03 = "#002b36", -- 背景
+      base02 = "#073642", -- 背景高亮
+      base01 = "#586e75", -- 注释 / 次要内容
+      base00 = "#657b83", -- 正文
+      base0 = "#839496", -- 注释 / 次要内容
+      base1 = "#93a1a1", -- 可选强调内容
+      yellow = "#b58900",
+      orange = "#cb4b16",
+      red = "#dc322f",
+      magenta = "#d33682",
+      violet = "#6c71c4",
+      blue = "#268bd2",
+      cyan = "#2aa198",
+      green = "#859900",
     }
 
     local function separator()
@@ -38,7 +27,7 @@ return {
         function()
           return "│"
         end,
-        color = { fg = colors.surface0, bg = "NONE", gui = "bold" },
+        color = { fg = colors.base01, bg = "NONE", gui = "bold" },
         padding = { left = 1, right = 1 },
       }
     end
@@ -100,7 +89,7 @@ return {
           "diff",
           colored = true,
           diff_color = {
-            added = { fg = colors.teal, bg = "none", gui = "bold" },
+            added = { fg = colors.cyan, bg = "none", gui = "bold" },
             modified = { fg = colors.yellow, bg = "none", gui = "bold" },
             removed = { fg = colors.red, bg = "none", gui = "bold" },
           },
@@ -212,7 +201,7 @@ return {
             end,
             hint = function()
               local count = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
-              return { fg = (count == 0) and colors.green or colors.teal, bg = "none", gui = "bold" }
+              return { fg = (count == 0) and colors.green or colors.cyan, bg = "none", gui = "bold" }
             end,
           },
           symbols = {
